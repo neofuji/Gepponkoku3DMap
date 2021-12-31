@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="author" content="Toru Higuruma" />
+  <meta name="description" content="現代和風架空想像国家「月本國」の立体地図が閲覧できます。" />
+  <title>月本國立体地図 Gepponkoku 3D Map</title>
+  <style>
+    html { overflow: hidden; }
+    body { margin: 0; }
+    #copyright {
+      position: fixed;
+      right: 0;
+      bottom: 0;
+      padding: 1px 4px;
+      height: 16px;
+      font-size: 12px;
+      font-family: Verdana, Geneva, Tahoma, sans-serif;
+      background-color: #FFFFFFC0;
+      color: #000000;
+      line-height: 1;
+    }
+    #copyright a {
+      color: #000000;
+      text-decoration: underline;
+    }
+    #copyright a:hover {
+      color: #404040;
+      text-decoration: none;
+    }
+    #splash {
+      position: absolute;
+      z-index: 2;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #131346;
+    }
+    #debugStatus {
+      position: fixed;
+      right: 136px;
+      top: 8px;
+      z-index: 3;
+      padding: 0 4px;
+      max-width: 60%;
+      background-color: #00000080;
+    }
+    #debugStatus > * {
+      color: #FFFF00;
+      font-family: monospace;
+      font-size: 11px;
+      line-height: 1.5;
+      text-align: right;
+      white-space: pre-wrap;
+    }
+    #debugMap {
+      position: fixed;
+      right: 8px;
+      top: 8px;
+      z-index: 3;
+      background-color: #00000080;
+    }
+  </style>
+</head>
+
+<body>
+  <footer id="copyright">
+    <a href="https://gepponkoku.nation.jp" target="_blank">Gepponkoku &copy; 2001-2021 Gotorin</a> /
+    <a href="https://github.com/neofuji/Gepponkoku3DMap" target="_blank">&copy; 2021 Toru Higuruma <img src="img/GitHub-Mark-64px.png" width="16" height="16" alt="View on GitHub" style="vertical-align: text-top;" /></a>
+  </footer>
+  <div id="splash">
+    <svg viewbox="-63.66197723675813 -63.66197723675813 127.32395447351627 127.32395447351627" width="100%" height="100%">
+      <circle r="15.915494309189533" stroke-width="31.830988618379067" stroke-dashoffset="75" stroke-dasharray="100,0" stroke="#FFFF0040" fill="#00000000" />
+      <circle id="progressCircle" r="15.915494309189533" stroke-width="31.830988618379067" stroke-dashoffset="75" stroke-dasharray="100,0" stroke="#FFFF00" fill="#00000000" />
+    </svg>
+  </div>
+  <div id="debugStatus" hidden="hidden">
+    <div id="debugClientStatus"></div>
+    <div id="debugLoaderStatus"></div>
+    <div id="debugRenderStatus"></div>
+  </div>
+  <div id="debugMap" hidden="hidden">
+    <svg width="120" height="120">
+      <path id="debugGeometryMapPath" x="10" y="10" fill="#FFFFFFC0" />
+      <path id="debugMapPath" x="10" y="10" stroke="#FFFFFFC0" fill="transparent" />
+      <path id="debugVisibleMapPath" x="10" y="10" fill="#FF000090" />
+      <path id="debugCenterMapPath" x="10" y="10" stroke="#00FFFF" fill="transparent" />
+    </svg>
+  </div>
+  <script src="js/three.min.js" defer="defer"></script>
+  <script src="js/OrbitControls.js" defer="defer"></script>
+  <script src="js/VertexNormalsHelper.js" defer="defer"></script>
+  <script src="ZMapGeometry.js" defer="defer"></script>
+  <script src="js/stats.min.js"></script>
+  <script>
+    "use strict";
+
+    class ImageWrapper {
+      constructor(/** @type {string} */ src) {
+        this.src = src;
+        this.image = /** @type {CanvasImageSource} */ (null);
+      }
+
+      start() {
+        this.image = new Image();
+        this.image.src = this.src;
+      }
+
+      decode() {
+        return this.image.decode();
+      }
+    }
+
+    const DEBUG = location.search === "?debug";
+
+    let isThreeReady = false;
+    let isStarted = false;
+    let scene;
+    let camera;
+
+    let imageLoadAll = 0;
+    let imageLoadProgress = 0;
+    const zImageQueue = [];
+    const zMapQueue = [];
+
+    let isRenderRequested = false;
+    let renderer;
+    let controls;
+
+    const stats = new Stats();
+    if (DEBUG) {
+      document.body.appendChild(stats.dom);
+      window.debugStatus.hidden = false;
+      window.debugMap.hidden = false;
+    }
+
+    const tileMap = [
+      ["n02n07", "n01n07", "n00n07", "p01n07", "p02n07", "xxxsea", "p04n07", "p05n07", ],
+      ["n02n06", "n01n06", "n00n06", "p01n06", "p02n06", "p03n06", "p04n06", "p05n06", ],
+      ["n02n05", "n01n05", "n00n05", "p01n05", "p02n05", "p03n05", "p04n05", "p05n05", "p06n05", "p07n05", ],
+      ["n02n04", "n01n04", "n00n04", "p01n04", "p02n04", "p03n04", "p04n04", "p05n04", "p06n04", "p07n04", ],
+      ["n02n03", "n01n03", "n00n03", "p01n03", "p02n03", "p03n03", "p04n03", "p05n03", "p06n03", "p07n03", ],
+      ["n02n02", "n01n02", "n00n02", "p01n02", "p02n02", "p03n02", "p04n02", "p05n02", "p06n02", "p07n02", ],
+      ["n02n01", "n01n01", "n00n01", "p01n01", "p02n01", "p03n01", "p04n01", "p05n01", "p06n01", "p07n01", ],
+      ["n02n00", "n01n00", "n00n00", "p01n00", "p02n00", "p03n00", "p04n00", "p05n00", "p06n00", "p07n00", ],
+      ["n02p01", "n01p01", "n00p01", "p01p01", "p02p01", "p03p01", "p04p01", "p05p01", "p06p01", "xxxsea", ],
+      ["n02p02", "n01p02", "n00p02", "p01p02", "p02p02", "p03p02", "p04p02", "p05p02", "p06p02", "xxxsea", ],
+    ];
+    const seaId = "xxxsea";
+
+    const sourceImageWidth = 500;
+    const sourceImageHeight = 500;
+    const zMapResizeFactor = 2;
+    const texturePadding = 6;
+    const textureWidth = 512;
+    const textureHeight = 512;
+    const tileWidth = 50000;
+    const tileHeight = 50000;
+    const offsetX = 25000 * -5;
+    const offsetY = 25000 * -15;
+
+    let loadingLeftX = 0;
+    let loadingRightX = 6 - 1;
+    let loadingTopY = 4;
+    let loadingBottomY = 10 - 1;
+
+    /** @type {ImageWrapper[][]} */
+    const tileZMapSourceImages = [];
+
+    /** @type {ImageWrapper[][]} */
+    const tileTextureSourceImages = [];
+
+    /** @type {Int16Array[][][]} */
+    const zMaps = [];
+
+    /** @type {number[][]} */
+    const zMapDependents = [];
+
+    const tileTextures = [];
+    const tileMeshes = [];
+
+    let timeB = 0.0;
+    let timeC = 0.0;
+    let timeD = 0.0;
+    let timeE = 0.0;
+    let timeF = 0.0;
+    let timeOnLoad = 0.0;
+
+    const zCanvas = document.createElement("canvas");
+    zCanvas.width = sourceImageWidth;
+    zCanvas.height = sourceImageHeight;
+
+    const zContext = zCanvas.getContext("2d", { alpha: false });
+
+    const geometryGenerateQueue = [];
+    let isGeometryGeneratedLastFrame = false;
+
+    load1();
+    animateLoading();
+    document.addEventListener("DOMContentLoaded", () => {
+      initScene();
+      load2();
+    }, false);
+
+
+    function load1() {
+      if (DEBUG) {
+        console.log("start load1() at", performance.now(), "ms");
+        console.time("load1()");
+        timeF -= performance.now();
+      }
+
+      for (let y = 0; y < tileMap.length; y++) {
+        zMaps.push([]);
+        zMapDependents.push([]);
+        for (let x = 0; x < tileMap[y].length; x++) {
+          zMaps[y].push([]);
+        }
+      }
+
+      for (let y = 0; y < tileMap.length; y++) {
+        tileZMapSourceImages.push([]);
+        tileTextureSourceImages.push([]);
+        for (let x = 0; x < tileMap[y].length; x++) {
+          tileZMapSourceImages[y].push(new ImageWrapper("img/gmhc4min/gmhc" + tileMap[y][x] + ".png"));
+          tileTextureSourceImages[y].push(new ImageWrapper("img/gmhd4min/gmhd" + tileMap[y][x] + ".png"));
+        }
+      }
+
+      for (let y = 0; y < zMaps.length; y++) {
+        for (let x = 0; x < zMaps[y].length; x++) {
+          zMapDependents[y].push(
+            1 +
+            (y - 1 >= 0 && x - 1 >= 0 && zMaps[y - 1][x - 1] ? 1 : 0) +
+            (y - 1 >= 0 && zMaps[y - 1][x] ? 1 : 0) +
+            (y - 1 >= 0 && x + 1 < zMaps[y - 1].length ? 1 : 0) +
+            (x - 1 >= 0 ? 1 : 0) +
+            (x + 1 < zMaps[y].length ? 1 : 0) +
+            (y + 1 < zMaps.length && x - 1 >= 0 ? 1 : 0) +
+            (y + 1 < zMaps.length ? 1 : 0) +
+            (y + 1 < zMaps.length && x + 1 < zMaps[y + 1].length ? 1 : 0)
+          );
+          if (y >= loadingTopY - 1 && x <= loadingRightX + 1 && y <= loadingBottomY + 1 && x >= loadingLeftX - 1) {
+            for (let i = 0; i < 256; i++) {
+              zMaps[y][x].push(new Int16Array(256));
+            }
+          }
+          if (tileMap[y][x] !== seaId && y >= loadingTopY && x <= loadingRightX && y <= loadingBottomY && x >= loadingLeftX) {
+            imageLoadAll++;
+            tileZMapSourceImages[y][x].start();
+            tileZMapSourceImages[y][x].decode().then(() => {
+              onloadProgress();
+              onloadZImage(x, y);
+            }).catch(e => {
+              console.error(x, y, tileMap[y][x], e);
+            });
+          }
+        }
+      }
+
+      for (let y = 0; y < tileMap.length; y++) {
+        for (let x = 0; x < tileMap[y].length; x++) {
+          if (tileMap[y][x] !== seaId && y >= loadingTopY && x <= loadingRightX && y <= loadingBottomY && x >= loadingLeftX) {
+            imageLoadAll++;
+            tileTextureSourceImages[y][x].start();
+          }
+        }
+      }
+
+      if (DEBUG) {
+        console.timeEnd("load1()");
+      }
+    }
+
+    function initScene() {
+      scene = new THREE.Scene();
+      camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 1000000);
+      camera.up.set(0, 0, 1);
+      camera.position.set(0, -30000 + 10000, 60000 + 0);
+
+      const dLight = new THREE.DirectionalLight(0x666666, 1);
+      dLight.position.set(-1, 1, 1);
+      scene.add(dLight);
+
+      const aLight = new THREE.AmbientLight(0xc4c4c4);
+      scene.add(aLight);
+
+      renderer = new THREE.WebGLRenderer({ alpha: true, stencil: false });
+      renderer.setClearColor(0x131346);
+      resize();
+      window.addEventListener("resize", resize);
+      document.body.appendChild(renderer.domElement);
+      renderer.domElement.style.imageRendering = "pixelated";
+      renderer.domElement.style.userSelect = "none";
+
+      function resize() {
+        renderer.setPixelRatio(window.devicePixelRatio >= 2.5 ? window.devicePixelRatio / 2 : window.devicePixelRatio);
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        if (isStarted) { render(); }
+
+        if (DEBUG) {
+          window.debugClientStatus.textContent =
+            window.devicePixelRatio + "x " +
+            renderer.domElement.style.width + "," +
+            renderer.domElement.style.height + " " +
+            renderer.domElement.width + "," +
+            renderer.domElement.height;
+        }
+      }
+
+      controls = new THREE.MapControls(camera, renderer.domElement);
+      controls.target.y = 10000;
+      controls.target.z = 0;
+      controls.zoomSpeed = 1.5;
+      controls.enableDamping = true;
+      controls.minDistance = 30000;
+      controls.maxDistance = 300000;
+      controls.maxPolarAngle = 82.5 * Math.PI / 180;
+      controls.keyPanSpeed = 32;
+      controls.listenToKeyEvents(window);
+    }
+
+    function load2() {
+      if (DEBUG) {
+        console.log("start load2() at", performance.now(), "ms");
+      }
+      isThreeReady = true;
+      for (let y = 0; y < zMaps.length; y++) {
+        tileMeshes.push([]);
+        tileTextures.push([]);
+
+        for (let x = 0; x < zMaps[y].length; x++) {
+          tileMeshes[y].push(null);
+          const canvas = document.createElement("canvas");
+          canvas.width = textureWidth;
+          canvas.height = textureHeight;
+          const texture = new THREE.Texture(canvas);
+          texture.anisotropy = 4;
+          texture.format = THREE.RGBFormat;
+          tileTextures[y].push(texture);
+
+          if (tileTextureSourceImages[y][x]?.image) {
+            tileTextureSourceImages[y][x].decode().then(() => {
+              onloadProgress();
+              onloadTexture(x, y);
+            }).catch(e => {
+              console.error(x, y, tileMap[y][x], e);
+            });
+          } else if (tileMap[y][x] === seaId) {
+            if (y >= loadingTopY && x <= loadingRightX && y <= loadingBottomY && x >= loadingLeftX) {
+              onloadZImage(x, y);
+              onloadTexture(x, y);
+            }
+          }
+        }
+      }
+    }
+
+    function onloadZImage(x, y) {
+      zImageQueue.push([x, y]);
+    }
+
+    function createZMap(x, y) {
+      if (DEBUG) {
+        console.time("onloadZImage(" + x + ", " + y + ")");
+      }
+      const width = sourceImageWidth;
+      const height = sourceImageHeight;
+      const resizeFactor = zMapResizeFactor;
+      const dw = width / resizeFactor;
+      const dh = height / resizeFactor;
+      const padding = 3;
+      if (DEBUG) {
+        timeB -= performance.now();
+      }
+      const zMap = zMaps[y][x];
+      const startY = padding;
+      const startX = padding;
+      if (tileMap[y][x] === seaId) {
+        for (let dv = 0; dv < dh; dv++) {
+          const zMapRow = zMap[startY + dv];
+          zMapRow.fill(-100, startX + 0, startX + dw);
+        }
+      } else {
+        const image = tileZMapSourceImages[y][x];
+        zContext.drawImage(image.image, 0, 0);
+
+        const imageData = zContext.getImageData(0, 0, width, height);
+        const data = imageData.data;
+        for (let dv = 0; dv < dh; dv++) {
+          const zMapRow = zMap[startY + dv];
+          const v = dv * resizeFactor;
+          for (let du = 0; du < dw; du++) {
+            const u = du * resizeFactor;
+            let maxZ = -100;
+            for (let v2 = 0; v2 < resizeFactor; v2++) {
+              for (let u2 = 0; u2 < resizeFactor; u2++) {
+                const index = ((v + v2) * width + (u + u2)) * 4;
+                const r = data[index];
+                const g = data[index + 1];
+                const b = data[index + 2];
+                // const a = data[index + 3];
+                const color = (r << 16) | (g << 8) | b;
+                // const z = zPalette.indexOf(color) * 100;
+                let z = -100;
+                switch (color) {
+                  case 0x99CCFF: z = -100; break;
+                  case 0xFFFFCC: z =    0; break;
+                  case 0x66FF99: z =  100; break;
+                  case 0xCC99FF: z =  200; break;
+                  case 0xCCCC66: z =  300; break;
+                  case 0xFF00FF: z =  400; break;
+                  case 0x66FFFF: z =  500; break;
+                  case 0xFF6699: z =  600; break;
+                  case 0xAA33FF: z =  700; break;
+                  case 0x66CC66: z =  800; break;
+                  case 0xFF6600: z =  900; break;
+                  case 0xAA0000: z = 1000; break;
+                  case 0x55EE88: z = 1100; break;
+                  case 0xBB88EE: z = 1200; break;
+                  case 0xBBBB55: z = 1300; break;
+                  case 0xEE00EE: z = 1400; break;
+                  case 0x55EEEE: z = 1500; break;
+                  case 0xEE5588: z = 1600; break;
+                  case 0x9922EE: z = 1700; break;
+                  case 0x55BB55: z = 1800; break;
+                  case 0xEE5500: z = 1900; break;
+                  case 0x770000: z = 2000; break;
+                  case 0x44DD77: z = 2100; break;
+                  case 0xAA77DD: z = 2200; break;
+                  case 0xAAAA44: z = 2300; break;
+                  case 0xDD00DD: z = 2400; break;
+                  case 0x44DDDD: z = 2500; break;
+                  case 0xDD4477: z = 2600; break;
+                  case 0x8811DD: z = 2700; break;
+                  case 0x44AA44: z = 2800; break;
+                  case 0xDD4400: z = 2900; break;
+                  case 0x330000: z = 3000; break;
+                  case 0x33CC66: z = 3100; break;
+                  case 0x9966CC: z = 3200; break;
+                  case 0x999933: z = 3300; break;
+                  case 0xCC00CC: z = 3400; break;
+                  case 0x33CCCC: z = 3500; break;
+                  case 0xCC3366: z = 3600; break;
+                  case 0x7700CC: z = 3700; break;
+                  case 0x339933: z = 3800; break;
+                  case 0xCC3300: z = 3900; break;
+                  case 0x110000: z = 4000; break;
+                }
+                if (z > maxZ) {
+                  maxZ = z;
+                }
+              }
+            }
+            zMapRow[startX + du] = maxZ;
+          }
+        }
+      }
+      tileZMapSourceImages[y][x] = null;
+      if (DEBUG) {
+        timeB += performance.now();
+        timeC -= performance.now();
+      }
+      const w = width / resizeFactor;
+      const h = height / resizeFactor;
+      if (y - 1 >= 0) {
+        if (x - 1 >= 0) {
+          const zMapNW = zMaps[y - 1][x - 1];
+          if (zMapNW) {
+            for (let i = 0; i < padding; i++) {
+              for (let j = 0; j < padding; j++) {
+                zMapNW[h + padding + i][w + padding + j] = zMap[0 + padding + i][0 + padding + j];
+              }
+            }
+            if (--zMapDependents[y - 1][x - 1] === 0) {
+              zMapQueue.push([x - 1, y - 1, zMapNW, w + 2, h + 2]);
+            }
+          }
+        }
+        const zMapN = zMaps[y - 1][x];
+        if (zMapN) {
+          for (let u = 0 + padding; u < w + padding; u++) {
+            for (let i = 0; i < padding; i++) {
+              zMapN[h + padding + i][u] = zMap[0 + padding + i][u];
+            }
+          }
+          if (--zMapDependents[y - 1][x] === 0) {
+            zMapQueue.push([x, y - 1, zMapN, w + 2, h + 2]);
+          }
+        }
+        if (x + 1 < zMaps[y - 1].length) {
+          const zMapNE = zMaps[y - 1][x + 1];
+          if (zMapNE) {
+            for (let i = 0; i < padding; i++) {
+              for (let j = 0; j < padding; j++) {
+                zMapNE[h + padding + i][0 + j] = zMap[0 + padding + i][w + j];
+              }
+            }
+            if (--zMapDependents[y - 1][x + 1] === 0) {
+              zMapQueue.push([x + 1, y - 1, zMapNE, w + 2, h + 2]);
+            }
+          }
+        }
+      }
+      if (y + 1 < zMaps.length) {
+        if (x - 1 >= 0) {
+          const zMapSW = zMaps[y + 1][x - 1];
+          if (zMapSW) {
+            for (let i = 0; i < padding; i++) {
+              for (let j = 0; j < padding; j++) {
+                zMapSW[0 + i][w + padding + j] = zMap[h + i][0 + padding + j];
+              }
+            }
+            if (--zMapDependents[y + 1][x - 1] === 0) {
+              zMapQueue.push([x - 1, y + 1, zMapSW, w + 2, h + 2]);
+            }
+          }
+        }
+        const zMapS = zMaps[y + 1][x];
+        if (zMapS) {
+          for (let u = 0 + padding; u < w + padding; u++) {
+            for (let i = 0; i < padding; i++) {
+              zMapS[0 + i][u] = zMap[h + i][u];
+            }
+          }
+          if (--zMapDependents[y + 1][x] === 0) {
+            zMapQueue.push([x, y + 1, zMapS, w + 2, h + 2]);
+          }
+        }
+        if (x + 1 < zMaps[y + 1].length) {
+          const zMapSE = zMaps[y + 1][x + 1];
+          if (zMapSE) {
+            for (let i = 0; i < padding; i++) {
+              for (let j = 0; j < padding; j++) {
+                zMapSE[0 + i][0 + j] = zMap[h + i][w + j];
+              }
+            }
+            if (--zMapDependents[y + 1][x + 1] === 0) {
+              zMapQueue.push([x + 1, y + 1, zMapSE, w + 2, h + 2]);
+            }
+          }
+        }
+      }
+      if (x - 1 >= 0) {
+        const zMapW = zMaps[y][x - 1];
+        if (zMapW) {
+          for (let v = 0 + padding; v < h + padding; v++) {
+            for (let i = 0; i < padding; i++) {
+              zMapW[v][w + padding + i] = zMap[v][0 + padding + i];
+            }
+          }
+          if (--zMapDependents[y][x - 1] === 0) {
+            zMapQueue.push([x - 1, y, zMapW, w + 2, h + 2]);
+          }
+        }
+      }
+      if (x + 1 < zMaps[y].length) {
+        const zMapE = zMaps[y][x + 1];
+        if (zMapE) {
+          for (let v = 0 + padding; v < h + padding; v++) {
+            for (let i = 0; i < padding; i++) {
+              zMapE[v][0 + i] = zMap[v][w + i];
+            }
+          }
+          if (--zMapDependents[y][x + 1] === 0) {
+            zMapQueue.push([x + 1, y, zMapE, w + 2, h + 2]);
+          }
+        }
+      }
+      if (--zMapDependents[y][x] === 0) {
+        zMapQueue.push([x, y, zMap, w + 2, h + 2]);
+      }
+      if (DEBUG) {
+        timeC += performance.now();
+        console.timeEnd("onloadZImage(" + x + ", " + y + ")");
+      }
+    }
+
+    function smoothZMap(zMap, width, height) {
+      const padding = 1;
+      const bMap = [];
+      for (let i = 0; i < height + 4; i++) {
+        bMap.push(new Int8Array(width + 4));
+      }
+      for (let v = padding; v < height + 2 + padding; v++) {
+        const bMapRow = bMap[v];
+        const zMapRowT = zMap[v - 1];
+        const zMapRow = zMap[v];
+        const zMapRowB = zMap[v + 1];
+        for (let u = padding; u < width + 2 + padding; u++) {
+          const z = zMapRow[u];
+          if (z > zMapRow[u - 1] || z > zMapRow[u + 1] || z > zMapRowT[u] || z > zMapRowB[u]) {
+            continue;
+          }
+          if (z < zMapRow[u - 1] || z < zMapRow[u + 1] || z < zMapRowT[u] || z < zMapRowB[u]) {
+            bMapRow[u] += 50;
+            continue;
+          }
+        }
+      }
+      for (let v = 0; v < height + 4; v++) {
+        for (let u = 0; u < width + 4; u++) {
+          zMap[v][u] += bMap[v][u];
+        }
+      }
+    }
+
+    function onloadTexture(x, y) {
+      const w = sourceImageWidth;
+      const h = sourceImageHeight;
+      const padding = texturePadding;
+      if (DEBUG) {
+        console.time("onloadTexture(" + x + ", " + y + ")");
+        timeE -= performance.now();
+      }
+      const image = tileTextures[y][x].image;
+      const context = image.getContext("2d", { alpha: false });
+      function drawNext(x, y, width, height, sx, sy, dx, dy) {
+        // TODO: world's end
+        const context2 = tileTextures[y][x].image.getContext("2d", { alpha: false });
+        context2.drawImage(image, sx, sy, width, height, dx, dy, width, height);
+        tileTextures[y][x].needsUpdate = true;
+      }
+      const v = padding;
+      const u = padding;
+      if (tileMap[y][x] === seaId) {
+        context.fillStyle = "#99CCFF";
+        context.fillRect(u, v, w, h);
+      } else {
+        context.drawImage(tileTextureSourceImages[y][x].image, u, v);
+      }
+      if (y - 1 >= 0 && tileTextures[y - 1][x]) {
+        if (x - 1 >= 0 && tileTextures[y - 1][x - 1]) {
+          drawNext(x - 1, y - 1, padding, padding, u, v, w + padding, h + padding);
+        }
+        drawNext(x, y - 1, w, padding, u, v, u, h + padding);
+        if (x + 1 < tileTextures[y - 1].length && tileTextures[y - 1][x + 1]) {
+          drawNext(x + 1, y - 1, padding, padding, w, v, 0, h + padding);
+        }
+      }
+      if (x - 1 >= 0 && tileTextures[y][x - 1]) {
+        drawNext(x - 1, y, padding, h, u, v, w + padding, v);
+      }
+      if (x + 1 < tileTextures[y].length && tileTextures[y][x + 1]) {
+        drawNext(x + 1, y, padding, h, w, v, 0, v);
+      }
+      if (y + 1 < tileTextures.length && tileTextures[y + 1][x]) {
+        if (x - 1 >= 0 && tileTextures[y + 1][x - 1]) {
+          drawNext(x - 1, y + 1, padding, padding, u, h, w + padding, 0);
+        }
+        drawNext(x, y + 1, w, padding, u, h, u, 0);
+        if (x + 1 < tileTextures[y + 1].length && tileTextures[y + 1][x + 1]) {
+          drawNext(x + 1, y + 1, padding, padding, w, h, 0, 0);
+        }
+      }
+      tileTextureSourceImages[y][x] = null;
+      tileTextures[y][x].needsUpdate = true;
+      if (DEBUG) {
+        timeE += performance.now();
+        console.timeEnd("onloadTexture(" + x + ", " + y + ")");
+      }
+    }
+
+    function onloadProgress() {
+      if (DEBUG) {
+        updateDebugGeometryMap();
+        window.debugLoaderStatus.textContent =
+          timeB.toFixed(0) + "ms " + timeC.toFixed(0) + "ms " + timeD.toFixed(0) + "ms " + timeE.toFixed(0) + "ms " + timeF.toFixed(0) + "ms " + timeOnLoad.toFixed(0) + "ms\n";
+      }
+      if (imageLoadProgress >= imageLoadAll) { return; }
+      imageLoadProgress++;
+      if (DEBUG) {
+        window.debugLoaderStatus.textContent += imageLoadAll - imageLoadProgress;
+      }
+      window.progressCircle.setAttribute("stroke-dasharray", (imageLoadProgress / imageLoadAll) * 100 + "," + (1 - imageLoadProgress / imageLoadAll) * 100);
+    }
+
+    function loadMapRange() {
+      let count = 0;
+      const lastLeftX = loadingLeftX;
+      const lastRightX = loadingRightX;
+      const lastTopY = loadingTopY;
+      const lastBottomY = loadingBottomY;
+      const leftX = (loadingLeftX -= 1);
+      const rightX = (loadingRightX += 1);
+      const topY = (loadingTopY -= 1);
+      const bottomY = (loadingBottomY += 1);
+      for (let y = 0; y < tileMap.length; y++) {
+        for (let x = 0; x < tileMap[y].length; x++) {
+          if (y >= topY && x <= rightX && y <= bottomY && x >= leftX &&
+              !(y >= lastTopY && x <= lastRightX && y <= lastBottomY && x >= lastLeftX)) {
+            {
+              const image = tileZMapSourceImages[y][x];
+              if (image) {
+                count++;
+                image.start();
+                image.decode().then(() => {
+                  onloadProgress();
+                  if (loadingLeftX === leftX) { loadMapRange(); }
+                  onloadZImage(x, y);
+                }).catch(e => {
+                  if (loadingLeftX === leftX) { loadMapRange(); }
+                  console.error(x, y, tileMap[y][x], e);
+                });
+              } else if (tileMap[y][x] === seaId) {
+                onloadZImage(x, y);
+              }
+            }
+            {
+              const image = tileTextureSourceImages[y][x];
+              if (image) {
+                count++;
+                image.start();
+                image.decode().then(() => {
+                  onloadProgress();
+                  if (loadingLeftX === leftX) { loadMapRange(); }
+                  onloadTexture(x, y);
+                }).catch(e => {
+                  if (loadingLeftX === leftX) { loadMapRange(); }
+                  console.error(x, y, tileMap[y][x], e);
+                });
+              } else if (tileMap[y][x] === seaId) {
+                onloadTexture(x, y);
+              }
+            }
+          }
+        }
+      }
+      for (let y = 0; y < zMaps.length; y++) {
+        for (let x = 0; x < zMaps[y].length; x++) {
+          if (y >= lastTopY && x <= lastRightX && y <= lastBottomY && x >= lastLeftX) { continue; }
+          if (y >= loadingTopY - 1 && x <= loadingRightX + 1 && y <= loadingBottomY + 1 && x >= loadingLeftX - 1) {
+            if (zMaps[y][x].length === 0) {
+              for (let i = 0; i < 256; i++) {
+                zMaps[y][x].push(new Int16Array(256));
+              }
+            }
+          }
+        }
+      }
+      if (DEBUG) {
+        console.warn("loadMapRange", count);
+      }
+    }
+
+    function animateLoading() {
+      if (imageLoadProgress >= imageLoadAll && zImageQueue.length === 0 && zMapQueue.length === 0) {
+        requestAnimationFrame(animateLoaded);
+        loaded();
+      } else {
+        requestAnimationFrame(animateLoading);
+        if (zImageQueue.length > 0) {
+          const [x, y] = zImageQueue.shift();
+          createZMap(x, y);
+        }
+        if (isThreeReady && zMapQueue.length > 0) {
+          for (let [x, y, zMap, w, h] of zMapQueue) {
+            if (DEBUG) {
+              timeD -= performance.now();
+            }
+            smoothZMap(zMap, w, h);
+            createTile(x, y, zMap, w, h);
+            if (DEBUG) {
+              timeD += performance.now();
+            }
+          }
+          zMapQueue.length = 0;
+        }
+      }
+      stats.update();
+    }
+
+    function loaded() {
+      if (DEBUG) {
+        const now = performance.now();
+        timeF += now;
+        timeOnLoad = now;
+      }
+      window.splash.style.opacity = 1;
+      render();
+      isStarted = true;
+    }
+
+    function animateLoaded() {
+      requestAnimationFrame(animateLoaded);
+
+      if ("splash" in window) {
+        window.splash.style.opacity -= 0.125;
+        if (window.splash.style.opacity <= 0) {
+          window.splash.remove();
+          window.addEventListener("blur", () => {
+            disposeUnusedGeometries();
+            if (DEBUG) {
+              updateDebugRenderInfo();
+            }
+          }, false);
+          document.body.addEventListener("keydown", event => {
+            if (event.key === "f" && !event.repeat) {
+              document.body.requestFullscreen();
+            }
+          }, false);
+          controls.addEventListener("change", () => {
+            render();
+          }, false);
+          controls.addEventListener("change", function _loadMapRange() {
+            loadMapRange();
+            controls.removeEventListener("change", _loadMapRange);
+          }, false);
+        }
+      }
+
+      controls.update();
+
+      if (isRenderRequested) {
+        isRenderRequested = false;
+        renderImmediate();
+      }
+
+      if (!isGeometryGeneratedLastFrame) {
+        if (geometryGenerateQueue.length > 0) {
+          for (let i = 0; i < geometryGenerateQueue.length; i++) {
+            const [x, y] = geometryGenerateQueue[i];
+            if (!tileMeshes[y][x]) { continue; }
+            geometryGenerateQueue.splice(i--, 1);
+            if (ZMapGeometry.isPlaceholderGeometry(tileMeshes[y][x].geometry)) {
+              setTimeout(() => {
+                if (ZMapGeometry.isPlaceholderGeometry(tileMeshes[y][x].geometry)) {
+                  ZMapGeometry.replacePlaceholderGeometry(tileMeshes[y][x]);
+                  if (DEBUG) {
+                    updateDebugGeometryMap();
+                  }
+                }
+              }, 1);
+              break;
+            }
+          }
+        }
+        if (zImageQueue.length > 0) {
+          const [x, y] = zImageQueue.shift();
+          createZMap(x, y);
+        }
+        if (zMapQueue.length > 0) {
+          for (let [x, y, zMap, w, h] of zMapQueue) {
+            if (DEBUG) {
+              timeD -= performance.now();
+            }
+            smoothZMap(zMap, w, h);
+            createTile(x, y, zMap, w, h);
+            if (DEBUG) {
+              timeD += performance.now();
+            }
+            onloadProgress();
+          }
+          zMapQueue.length = 0;
+        }
+      }
+      isGeometryGeneratedLastFrame = false;
+
+      stats.update();
+    }
+
+    function createTile(x, y, zMap, widthPoints, heightPoints) {
+      const texture = tileTextures[y][x];
+      texture.repeat.x = 1 / (textureWidth * 100);
+      texture.repeat.y = 1 / (textureHeight * 100);
+      texture.offset.x = 0.5;
+      texture.offset.y = 0.5;
+      texture.updateMatrix();
+      texture.matrixAutoUpdate = false;
+
+      const material = new THREE.MeshLambertMaterial({ map: texture });
+      material.onBeforeCompile = (shader) => {
+        shader.vertexShader = shader.vertexShader.replace(
+          "\t#include <uv_vertex>\n",
+          "#ifdef USE_UV\n" +
+          "\tvUv = ( uvTransform * vec3( position.x, position.y, 1 ) ).xy;\n" +
+          "#endif\n"
+        );
+      };
+
+      const geometry = ZMapGeometry.placeholderGeometry(tileWidth, tileHeight, widthPoints, heightPoints, zMap);
+
+      const mesh = new THREE.Mesh(geometry, material);
+      mesh.position.x = tileWidth * (x + 0.5) + offsetX;
+      mesh.position.y = -(tileHeight * (y + 0.5) + offsetY);
+      mesh.updateMatrix();
+      mesh.matrixAutoUpdate = false;
+      mesh.frustumCulled = false;
+      mesh.visible = false;
+      scene.add(mesh);
+      tileMeshes[y][x] = mesh;
+    }
+
+    function disposeUnusedGeometries() {
+      for (let y = 0; y < tileMeshes.length; y++) {
+        x: for (let x = 0; x < tileMeshes[y].length; x++) {
+          const mesh = tileMeshes[y][x];
+          if (!mesh) { continue; }
+          if (!mesh.visible) {
+            for (let dy = -1; dy <= 1; dy++) {
+              if (y + dy < 0) { continue; }
+              if (y + dy >= tileMeshes.length) { break; }
+
+              for (let dx = -1; dx <= 1; dx++) {
+                if (x + dx < 0) { continue; }
+                if (x + dx >= tileMeshes[y + dy].length) { break; }
+                if (tileMeshes[y + dy][x + dx]?.visible) {
+                  continue x;
+                }
+              }
+            }
+            mesh.geometry.dispose();
+          }
+        }
+      }
+    }
+
+    function render() {
+      isRenderRequested = true;
+    }
+
+    function renderImmediate() {
+      hitTest();
+
+      renderer.render(scene, camera);
+
+      if (DEBUG) {
+        updateDebugRenderInfo();
+        updateDebugVisibleMap();
+      }
+    }
+
+    function hitTest() {
+      const queue1 = [];
+      const queue2 = [];
+      const _projScreenMatrix = new THREE.Matrix4();
+      const _frustum = new THREE.Frustum();
+      const _box = new THREE.Box3();
+      scene.updateMatrixWorld();
+      camera.updateMatrixWorld();
+      _projScreenMatrix.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse);
+      _frustum.setFromProjectionMatrix(_projScreenMatrix);
+      for (let y = 0; y < tileMeshes.length; y++) {
+        for (let x = 0; x < tileMeshes[y].length; x++) {
+          const mesh = tileMeshes[y][x];
+          if (!mesh) { continue; }
+          _box.copy(mesh.geometry.boundingBox).applyMatrix4(mesh.matrixWorld);
+          if (_frustum.intersectsBox(_box)) {
+            if (ZMapGeometry.isPlaceholderGeometry(mesh.geometry)) {
+              queue2.push([x, y]);
+              if (DEBUG) {
+                console.warn("tileMeshes[" + y + "][" + x + "] was not initialized");
+              }
+            } else if (mesh.geometry._zMap) {
+              queue1.push([x, y]);
+            }
+            mesh.visible = true;
+          } else {
+            mesh.visible = false;
+          }
+        }
+      }
+      if (queue1.length > 0 || queue2.length > 0) {
+        let queue;
+        const limit = 10;
+        if (queue1.length + queue2.length > limit) {
+          if (DEBUG) {
+            console.warn("dropping mesh initialization(s):", queue1.length + queue2.length - limit, "/", queue1.length + queue2.length);
+          }
+          const queue2Left = limit - queue1.length;
+          if (queue2Left > 0) {
+            const queue2Next = [];
+            i: for (let i = 0; i < queue2.length; i++) {
+              const [x, y] = queue2[i];
+              for (let dy = -1; dy <= 1; dy++) {
+                if (y + dy < 0) { continue; }
+                if (y + dy >= tileMeshes.length) { break; }
+
+                for (let dx = -1; dx <= 1; dx++) {
+                  if (x + dx < 0) { continue; }
+                  if (x + dx >= tileMeshes[y + dy].length) { break; }
+                  if (tileMeshes[y + dy][x + dx] && !ZMapGeometry.isPlaceholderGeometry(tileMeshes[y + dy][x + dx].geometry)) {
+                    queue2Next.push([x, y]);
+                    if (queue2Next.length >= queue2Left) {
+                      break i;
+                    }
+                    continue i;
+                  }
+                }
+              }
+            }
+            queue = queue1.concat(queue2Next, queue2);
+            queue.length = limit;
+          } else {
+            queue = queue1;
+            queue.length = limit;
+          }
+          render();
+        } else {
+          queue = queue1.concat(queue2);
+        }
+        for (let [x, y] of queue) {
+          if (ZMapGeometry.isPlaceholderGeometry(tileMeshes[y][x].geometry)) {
+            ZMapGeometry.replacePlaceholderGeometry(tileMeshes[y][x]);
+          }
+          tileMeshes[y][x].geometry.createVertices();
+          for (let dy = -1; dy <= 1; dy++) {
+            if (y + dy < 0) { continue; }
+            if (y + dy >= tileMeshes.length) { break; }
+
+            for (let dx = -1; dx <= 1; dx++) {
+              if (x + dx < 0) { continue; }
+              if (x + dx >= tileMeshes[y + dy].length) { break; }
+              if (!tileMeshes[y + dy][x + dx] || ZMapGeometry.isPlaceholderGeometry(tileMeshes[y + dy][x + dx].geometry)) {
+                geometryGenerateQueue.push([x + dx, y + dy]);
+              }
+            }
+          }
+        }
+        isGeometryGeneratedLastFrame = true;
+        if (DEBUG) {
+          updateDebugGeometryMap();
+        }
+      }
+    }
+
+    function updateDebugRenderInfo() {
+      const euler = new THREE.Euler();
+      euler.setFromQuaternion(camera.quaternion, "ZXY");
+      window.debugRenderStatus.textContent =
+        renderer.info.render.frame + "frame " +
+        renderer.info.render.calls + "calls " +
+        renderer.info.render.triangles + "tris\n" +
+        renderer.info.memory.geometries + "geoms " +
+        renderer.info.memory.textures + "texes " +
+        renderer.info.programs.length + "programs\n" +
+        "camera " + camera.position.x.toFixed(2) + ", " + camera.position.y.toFixed(2) + ", " + camera.position.z.toFixed(2) + "\n" +
+        "angle " + (euler.x * 180 / Math.PI).toFixed(2) + ", " + (euler.y * 180 / Math.PI).toFixed(2) + ", " + (euler.z * 180 / Math.PI).toFixed(2) + "\n" +
+        "center " + controls.target.x.toFixed(2) + ", " + controls.target.y.toFixed(2) + ", " + controls.target.z.toFixed(2) + "" +
+        "";
+    }
+
+    function updateDebugGeometryMap() {
+      let gd = "";
+      let d = "";
+      for (let y = 0; y < tileMeshes.length; y++) {
+        for (let x = 0; x < tileMeshes[y].length; x++) {
+          if (!tileMeshes[y][x]) { continue; }
+          if (!ZMapGeometry.isPlaceholderGeometry(tileMeshes[y][x].geometry)) {
+            if (tileMeshes[y][x].geometry._zMap) {
+              gd += "M" + (x * 10 + 13) + "," + (y * 10 + 13) + "h4v4h-4Z";
+            } else {
+              gd += "M" + (x * 10 + 11) + "," + (y * 10 + 11) + "h8v8h-8Z";
+            }
+          } else {
+            d += "M" + (x * 10 + 11.5) + "," + (y * 10 + 11.5) + "h7v7h-7Z";
+          }
+        }
+      }
+      window.debugGeometryMapPath.setAttribute("d", gd);
+      window.debugMapPath.setAttribute("d", d);
+    }
+
+    function updateDebugVisibleMap() {
+      let vd = "";
+      for (let y = 0; y < tileMeshes.length; y++) {
+        for (let x = 0; x < tileMeshes[y].length; x++) {
+          if (tileMeshes[y][x]?.visible) {
+            vd += "M" + (x * 10 + 11) + "," + (y * 10 + 11) + "h8v8h-8Z";
+          }
+        }
+      }
+      window.debugVisibleMapPath.setAttribute("d", vd);
+      const centerPos = controls.target;
+      const cameraPos = camera.position;
+      window.debugCenterMapPath.setAttribute("d",
+        "M" + ((centerPos.x - offsetX) / tileWidth * 10 - 5 + 10) + "," + ((-centerPos.y - offsetY) / tileWidth * 10 + 10) +
+        "h10m-5-5v10" +
+        "M" + ((cameraPos.x - offsetX) / tileHeight * 10 - 3 + 10) + "," + ((-cameraPos.y - offsetY) / tileHeight * 10 - 3 + 10) +
+        "l6,6m0-6l-6,6"
+      );
+    }
+  </script>
+</body>
+
+</html>
