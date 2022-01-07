@@ -146,16 +146,17 @@
     }
 
     const tileMap = [
-      ["n02n07", "n01n07", "n00n07", "p01n07", "p02n07", "xxxsea", "p04n07", "p05n07", ],
-      ["n02n06", "n01n06", "n00n06", "p01n06", "p02n06", "p03n06", "p04n06", "p05n06", ],
-      ["n02n05", "n01n05", "n00n05", "p01n05", "p02n05", "p03n05", "p04n05", "p05n05", "p06n05", "p07n05", ],
-      ["n02n04", "n01n04", "n00n04", "p01n04", "p02n04", "p03n04", "p04n04", "p05n04", "p06n04", "p07n04", ],
-      ["n02n03", "n01n03", "n00n03", "p01n03", "p02n03", "p03n03", "p04n03", "p05n03", "p06n03", "p07n03", ],
-      ["n02n02", "n01n02", "n00n02", "p01n02", "p02n02", "p03n02", "p04n02", "p05n02", "p06n02", "p07n02", ],
-      ["n02n01", "n01n01", "n00n01", "p01n01", "p02n01", "p03n01", "p04n01", "p05n01", "p06n01", "p07n01", ],
-      ["n02n00", "n01n00", "n00n00", "p01n00", "p02n00", "p03n00", "p04n00", "p05n00", "p06n00", "p07n00", ],
-      ["n02p01", "n01p01", "n00p01", "p01p01", "p02p01", "p03p01", "p04p01", "p05p01", "p06p01", "xxxsea", ],
-      ["n02p02", "n01p02", "n00p02", "p01p02", "p02p02", "p03p02", "p04p02", "p05p02", "p06p02", "xxxsea", ],
+      ["n03n07", "n02n07", "n01n07", "n00n07", "p01n07", "p02n07", "xxxsea", "p04n07", ""      , ""      , ""      , ],
+      ["n03n06", "n02n06", "n01n06", "n00n06", "p01n06", "p02n06", "p03n06", "p04n06", "p05n06", ""      , ""      , ],
+      ["xxxsea", "n02n05", "n01n05", "n00n05", "p01n05", "p02n05", "p03n05", "p04n05", "p05n05", "p06n05", "p07n05", ],
+      ["xxxsea", "n02n04", "n01n04", "n00n04", "p01n04", "p02n04", "p03n04", "p04n04", "p05n04", "p06n04", "p07n04", ],
+      ["n03n03", "n02n03", "n01n03", "n00n03", "p01n03", "p02n03", "p03n03", "p04n03", "p05n03", "p06n03", "p07n03", ],
+      ["n03n02", "n02n02", "n01n02", "n00n02", "p01n02", "p02n02", "p03n02", "p04n02", "p05n02", "p06n02", "p07n02", ],
+      ["n03n01", "n02n01", "n01n01", "n00n01", "p01n01", "p02n01", "p03n01", "p04n01", "p05n01", "p06n01", "p07n01", ],
+      ["n03n00", "n02n00", "n01n00", "n00n00", "p01n00", "p02n00", "p03n00", "p04n00", "p05n00", "p06n00", "p07n00", ],
+      ["n03p01", "n02p01", "n01p01", "n00p01", "p01p01", "p02p01", "p03p01", "p04p01", "p05p01", "p06p01", "xxxsea", ],
+      [""      , "n02p02", "n01p02", "n00p02", "p01p02", "p02p02", "p03p02", "p04p02", "p05p02", "p06p02", "xxxsea", ],
+      [""      , ""      , ""      , "n00p03", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "p05p03", "p06p03", "xxxsea", ],
     ];
     const seaId = "xxxsea";
 
@@ -167,11 +168,11 @@
     const textureHeight = 512;
     const tileWidth = 50000;
     const tileHeight = 50000;
-    const offsetX = 25000 * -5;
+    const offsetX = 25000 * -7;
     const offsetY = 25000 * -15;
 
     let loadingLeftX = 0;
-    let loadingRightX = 6 - 1;
+    let loadingRightX = 7 - 1;
     let loadingTopY = 4;
     let loadingBottomY = 10 - 1;
 
@@ -225,7 +226,7 @@
         zMaps.push([]);
         zMapDependents.push([]);
         for (let x = 0; x < tileMap[y].length; x++) {
-          zMaps[y].push([]);
+          zMaps[y].push(tileMap[y][x] ? [] : null);
         }
       }
 
@@ -233,23 +234,27 @@
         tileZMapSourceImages.push([]);
         tileTextureSourceImages.push([]);
         for (let x = 0; x < tileMap[y].length; x++) {
-          tileZMapSourceImages[y].push(new ImageWrapper("img/gmhc4min/gmhc" + tileMap[y][x] + ".png"));
-          tileTextureSourceImages[y].push(new ImageWrapper("img/gmhd4min/gmhd" + tileMap[y][x] + ".png"));
+          tileZMapSourceImages[y].push(tileMap[y][x] ? new ImageWrapper("img/gmhc4min/gmhc" + tileMap[y][x] + ".png") : null);
+          tileTextureSourceImages[y].push(tileMap[y][x] ? new ImageWrapper("img/gmhd4min/gmhd" + tileMap[y][x] + ".png") : null);
         }
       }
 
       for (let y = 0; y < zMaps.length; y++) {
         for (let x = 0; x < zMaps[y].length; x++) {
+          if (!zMaps[y][x]) {
+            zMapDependents[y].push(null);
+            continue;
+          }
           zMapDependents[y].push(
             1 +
             (y - 1 >= 0 && x - 1 >= 0 && zMaps[y - 1][x - 1] ? 1 : 0) +
             (y - 1 >= 0 && zMaps[y - 1][x] ? 1 : 0) +
-            (y - 1 >= 0 && x + 1 < zMaps[y - 1].length ? 1 : 0) +
-            (x - 1 >= 0 ? 1 : 0) +
-            (x + 1 < zMaps[y].length ? 1 : 0) +
-            (y + 1 < zMaps.length && x - 1 >= 0 ? 1 : 0) +
-            (y + 1 < zMaps.length ? 1 : 0) +
-            (y + 1 < zMaps.length && x + 1 < zMaps[y + 1].length ? 1 : 0)
+            (y - 1 >= 0 && x + 1 < zMaps[y - 1].length && zMaps[y - 1][x + 1] ? 1 : 0) +
+            (x - 1 >= 0 && zMaps[y][x - 1] ? 1 : 0) +
+            (x + 1 < zMaps[y].length && zMaps[y][x + 1] ? 1 : 0) +
+            (y + 1 < zMaps.length && x - 1 >= 0 && zMaps[y + 1][x - 1] ? 1 : 0) +
+            (y + 1 < zMaps.length && zMaps[y + 1][x] ? 1 : 0) +
+            (y + 1 < zMaps.length && x + 1 < zMaps[y + 1].length && zMaps[y + 1][x + 1] ? 1 : 0)
           );
           if (y >= loadingTopY - 1 && x <= loadingRightX + 1 && y <= loadingBottomY + 1 && x >= loadingLeftX - 1) {
             for (let i = 0; i < 256; i++) {
@@ -271,6 +276,7 @@
 
       for (let y = 0; y < tileMap.length; y++) {
         for (let x = 0; x < tileMap[y].length; x++) {
+          if (!tileMap[y][x]) { continue; }
           if (tileMap[y][x] !== seaId && y >= loadingTopY && x <= loadingRightX && y <= loadingBottomY && x >= loadingLeftX) {
             imageLoadAll++;
             tileTextureSourceImages[y][x].start();
@@ -344,6 +350,10 @@
 
         for (let x = 0; x < zMaps[y].length; x++) {
           tileMeshes[y].push(null);
+          if (!zMaps[y][x]) {
+            tileTextures[y].push(null);
+            continue;
+          }
           const canvas = document.createElement("canvas");
           canvas.width = textureWidth;
           canvas.height = textureHeight;
@@ -700,6 +710,7 @@
       const bottomY = (loadingBottomY += 1);
       for (let y = 0; y < tileMap.length; y++) {
         for (let x = 0; x < tileMap[y].length; x++) {
+          if (!tileMap[y][x]) { continue; }
           if (y >= topY && x <= rightX && y <= bottomY && x >= leftX &&
               !(y >= lastTopY && x <= lastRightX && y <= lastBottomY && x >= lastLeftX)) {
             {
@@ -741,6 +752,7 @@
       }
       for (let y = 0; y < zMaps.length; y++) {
         for (let x = 0; x < zMaps[y].length; x++) {
+          if (!zMaps[y][x]) { continue; }
           if (y >= lastTopY && x <= lastRightX && y <= lastBottomY && x >= lastLeftX) { continue; }
           if (y >= loadingTopY - 1 && x <= loadingRightX + 1 && y <= loadingBottomY + 1 && x >= loadingLeftX - 1) {
             if (zMaps[y][x].length === 0) {
@@ -1061,12 +1073,12 @@
           if (!tileMeshes[y][x]) { continue; }
           if (!ZMapGeometry.isPlaceholderGeometry(tileMeshes[y][x].geometry)) {
             if (tileMeshes[y][x].geometry._zMap) {
-              gd += "M" + (x * 10 + 13) + "," + (y * 10 + 13) + "h4v4h-4Z";
+              gd += "M" + (x * 10 + 8) + "," + (y * 10 + 8) + "h4v4h-4Z";
             } else {
-              gd += "M" + (x * 10 + 11) + "," + (y * 10 + 11) + "h8v8h-8Z";
+              gd += "M" + (x * 10 + 6) + "," + (y * 10 + 6) + "h8v8h-8Z";
             }
           } else {
-            d += "M" + (x * 10 + 11.5) + "," + (y * 10 + 11.5) + "h7v7h-7Z";
+            d += "M" + (x * 10 + 6.5) + "," + (y * 10 + 6.5) + "h7v7h-7Z";
           }
         }
       }
@@ -1079,7 +1091,7 @@
       for (let y = 0; y < tileMeshes.length; y++) {
         for (let x = 0; x < tileMeshes[y].length; x++) {
           if (tileMeshes[y][x]?.visible) {
-            vd += "M" + (x * 10 + 11) + "," + (y * 10 + 11) + "h8v8h-8Z";
+            vd += "M" + (x * 10 + 6) + "," + (y * 10 + 6) + "h8v8h-8Z";
           }
         }
       }
@@ -1087,9 +1099,9 @@
       const centerPos = controls.target;
       const cameraPos = camera.position;
       window.debugCenterMapPath.setAttribute("d",
-        "M" + ((centerPos.x - offsetX) / tileWidth * 10 - 5 + 10) + "," + ((-centerPos.y - offsetY) / tileWidth * 10 + 10) +
+        "M" + ((centerPos.x - offsetX) / tileWidth * 10 - 5 + 5) + "," + ((-centerPos.y - offsetY) / tileWidth * 10 + 5) +
         "h10m-5-5v10" +
-        "M" + ((cameraPos.x - offsetX) / tileHeight * 10 - 3 + 10) + "," + ((-cameraPos.y - offsetY) / tileHeight * 10 - 3 + 10) +
+        "M" + ((cameraPos.x - offsetX) / tileHeight * 10 - 3 + 5) + "," + ((-cameraPos.y - offsetY) / tileHeight * 10 - 3 + 5) +
         "l6,6m0-6l-6,6"
       );
     }
