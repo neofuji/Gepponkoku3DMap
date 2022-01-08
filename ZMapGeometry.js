@@ -32,8 +32,10 @@ class ZMapGeometry extends THREE.BufferGeometry {
   }
 
   static replacePlaceholderGeometry(mesh) {
-    const parameters = mesh.geometry.parameters;
-    mesh.geometry = ZMapGeometry.generateGeometry(parameters.width, parameters.height, parameters.widthPoints, parameters.heightPoints, parameters.zMap, mesh.geometry.boundingBox);
+    const geometry = mesh.geometry;
+    const parameters = geometry.parameters;
+    mesh.geometry = ZMapGeometry.generateGeometry(parameters.width, parameters.height, parameters.widthPoints, parameters.heightPoints, parameters.zMap, geometry.boundingBox);
+    geometry.dispose();
   }
 
   static computeBoundingBox(width, height, widthPoints, heightPoints, zMap) {
