@@ -1006,6 +1006,7 @@
                   if (x + dx >= tileMeshes[y + dy].length) { break; }
                   if (tileMeshes[y + dy][x + dx] && !ZMapGeometry.isPlaceholderGeometry(tileMeshes[y + dy][x + dx].geometry)) {
                     queue2Next.push([x, y]);
+                    queue2.splice(i--, 1);
                     if (queue2Next.length >= queue2Left) {
                       break i;
                     }
