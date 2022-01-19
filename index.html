@@ -359,7 +359,6 @@
           canvas.height = textureHeight;
           const texture = new THREE.Texture(canvas);
           texture.anisotropy = 4;
-          texture.format = THREE.RGBFormat;
           tileTextures[y].push(texture);
 
           if (tileTextureSourceImages[y][x]?.image) {
