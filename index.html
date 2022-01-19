@@ -898,7 +898,7 @@
         shader.vertexShader = shader.vertexShader.replace(
           "\t#include <uv_vertex>\n",
           "#ifdef USE_UV\n" +
-          "\tvUv = ( uvTransform * vec3( position.x, position.y, 1 ) ).xy;\n" +
+          "\tvUv = ( uvTransform * vec3( position.xy, 1 ) ).xy;\n" +
           "#endif\n"
         );
       };
