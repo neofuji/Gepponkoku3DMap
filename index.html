@@ -187,6 +187,9 @@
     /** @type {number[][]} */
     const zMapDependents = [];
 
+    /** @type {Int16Array[]} */
+    const zMapSea = [];
+
     const tileTextures = [];
     const tileMeshes = [];
 
@@ -238,6 +241,12 @@
         }
       }
 
+      const zMapSeaRow = new Int16Array(256);
+      for (let i = 0; i < 256; i++) {
+        zMapSeaRow[i] = -100;
+        zMapSea.push(zMapSeaRow);
+      }
+
       for (let y = 0; y < zMaps.length; y++) {
         for (let x = 0; x < zMaps[y].length; x++) {
           if (!zMaps[y][x]) {
@@ -256,8 +265,12 @@
             (y + 1 < zMaps.length && x + 1 < zMaps[y + 1].length && zMaps[y + 1][x + 1] ? 1 : 0)
           );
           if (y >= loadingTopY - 1 && x <= loadingRightX + 1 && y <= loadingBottomY + 1 && x >= loadingLeftX - 1) {
-            for (let i = 0; i < 256; i++) {
-              zMaps[y][x].push(new Int16Array(256));
+            if (tileMap[y][x] === seaId) {
+              zMaps[y][x] = zMapSea;
+            } else {
+              for (let i = 0; i < 256; i++) {
+                zMaps[y][x].push(new Int16Array(256));
+              }
             }
           }
           if (tileMap[y][x] !== seaId && y >= loadingTopY && x <= loadingRightX && y <= loadingBottomY && x >= loadingLeftX) {
@@ -343,6 +356,15 @@
         console.log("start load2() at", performance.now(), "ms");
       }
       isThreeReady = true;
+
+      const tileTextureSeaCanvas = document.createElement("canvas");
+      tileTextureSeaCanvas.width = textureWidth;
+      tileTextureSeaCanvas.height = textureHeight;
+      const context = tileTextureSeaCanvas.getContext("2d");
+      context.fillStyle = "#99CCFF";
+      context.fillRect(0, 0, textureWidth, textureHeight);
+      const tileTextureSea = new THREE.Texture(tileTextureSeaCanvas);
+
       for (let y = 0; y < zMaps.length; y++) {
         tileMeshes.push([]);
         tileTextures.push([]);
@@ -353,11 +375,17 @@
             tileTextures[y].push(null);
             continue;
           }
-          const canvas = document.createElement("canvas");
-          canvas.width = textureWidth;
-          canvas.height = textureHeight;
-          const texture = new THREE.Texture(canvas);
-          texture.anisotropy = 4;
+
+          let texture;
+          if (tileMap[y][x] === seaId) {
+            texture = tileTextureSea;
+          } else {
+            const canvas = document.createElement("canvas");
+            canvas.width = textureWidth;
+            canvas.height = textureHeight;
+            texture = new THREE.Texture(canvas);
+            texture.anisotropy = 4;
+          }
           tileTextures[y].push(texture);
 
           if (tileTextureSourceImages[y][x]?.image) {
@@ -397,12 +425,7 @@
       const zMap = zMaps[y][x];
       const startY = padding;
       const startX = padding;
-      if (tileMap[y][x] === seaId) {
-        for (let dv = 0; dv < dh; dv++) {
-          const zMapRow = zMap[startY + dv];
-          zMapRow.fill(-100, startX + 0, startX + dw);
-        }
-      } else {
+      if (tileMap[y][x] !== seaId) {
         const image = tileZMapSourceImages[y][x];
         zContext.drawImage(image.image, 0, 0);
 
@@ -644,10 +667,7 @@
       }
       const v = padding;
       const u = padding;
-      if (tileMap[y][x] === seaId) {
-        context.fillStyle = "#99CCFF";
-        context.fillRect(u, v, w, h);
-      } else {
+      if (tileMap[y][x] !== seaId) {
         context.drawImage(tileTextureSourceImages[y][x].image, u, v);
       }
       if (y - 1 >= 0 && tileTextures[y - 1][x]) {
@@ -754,8 +774,12 @@
           if (y >= lastTopY && x <= lastRightX && y <= lastBottomY && x >= lastLeftX) { continue; }
           if (y >= loadingTopY - 1 && x <= loadingRightX + 1 && y <= loadingBottomY + 1 && x >= loadingLeftX - 1) {
             if (zMaps[y][x].length === 0) {
-              for (let i = 0; i < 256; i++) {
-                zMaps[y][x].push(new Int16Array(256));
+              if (tileMap[y][x] === seaId) {
+                zMaps[y][x] = zMapSea;
+              } else {
+                for (let i = 0; i < 256; i++) {
+                  zMaps[y][x].push(new Int16Array(256));
+                }
               }
             }
           }
