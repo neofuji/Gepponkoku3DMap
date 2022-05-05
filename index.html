@@ -145,6 +145,8 @@
     }
 
     const tileMap = [
+      ["xxxsea", "n02n10", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", ""      , ""      , ""      , ""      , ""      , ],
+      ["xxxsea", "n02n09", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "p05n09", "p06n09", "p07n09", "p08n09", "p09n09", "xxxsea", ],
       ["xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "p05n08", "p06n08", "p07n08", "p08n08", "p09n08", "p10n08", ],
       ["n03n07", "n02n07", "n01n07", "n00n07", "p01n07", "p02n07", "xxxsea", "p04n07", "p05n07", "p06n07", "p07n07", "p08n07", "p09n07", "p10n07", ],
       ["n03n06", "n02n06", "n01n06", "n00n06", "p01n06", "p02n06", "p03n06", "p04n06", "p05n06", "p06n06", "p07n06", "p08n06", "p09n06", "xxxsea", ],
@@ -169,12 +171,12 @@
     const tileWidth = 50000;
     const tileHeight = 50000;
     const offsetX = 25000 * -7;
-    const offsetY = 25000 * -17;
+    const offsetY = 25000 * -21;
 
     let loadingLeftX = 0;
     let loadingRightX = 7 - 1;
-    let loadingTopY = 5;
-    let loadingBottomY = 11 - 1;
+    let loadingTopY = 7;
+    let loadingBottomY = 13 - 1;
 
     /** @type {ImageWrapper[][]} */
     const tileZMapSourceImages = [];
