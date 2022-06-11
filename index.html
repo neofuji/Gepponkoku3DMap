@@ -92,6 +92,7 @@
   </div>
   <div id="debugMap" hidden="hidden">
     <svg width="240" height="240" viewbox="0 0 240 240">
+      <path id="debugSeaGeometryMapPath" fill="#80C0FFC0" />
       <path id="debugGeometryMapPath" fill="#FFFFFFC0" />
       <path id="debugMapPath" stroke="#FFFFFFC0" fill="transparent" />
       <path id="debugVisibleMapPath" fill="#FF000090" />
@@ -1099,22 +1100,25 @@
     }
 
     function updateDebugGeometryMap() {
+      let sgd = "";
       let gd = "";
       let d = "";
       for (let y = 0; y < tileMeshes.length; y++) {
         for (let x = 0; x < tileMeshes[y].length; x++) {
           if (!tileMeshes[y][x]) { continue; }
           if (!ZMapGeometry.isPlaceholderGeometry(tileMeshes[y][x].geometry)) {
-            if (tileMeshes[y][x].geometry._zMap) {
-              gd += "M" + (x * 10 + 8) + "," + (y * 10 + 8) + "h4v4h-4Z";
+            const segment = tileMeshes[y][x].geometry._zMap ? "M" + (x * 10 + 8) + "," + (y * 10 + 8) + "h4v4h-4Z" : "M" + (x * 10 + 6) + "," + (y * 10 + 6) + "h8v8h-8Z";
+            if (tileMap[y][x] === seaId) {
+              sgd += segment;
             } else {
-              gd += "M" + (x * 10 + 6) + "," + (y * 10 + 6) + "h8v8h-8Z";
+              gd += segment;
             }
           } else {
             d += "M" + (x * 10 + 6.5) + "," + (y * 10 + 6.5) + "h7v7h-7Z";
           }
         }
       }
+      window.debugSeaGeometryMapPath.setAttribute("d", sgd);
       window.debugGeometryMapPath.setAttribute("d", gd);
       window.debugMapPath.setAttribute("d", d);
     }
