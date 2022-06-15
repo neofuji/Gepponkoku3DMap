@@ -324,6 +324,7 @@
 
     function initScene() {
       scene = new THREE.Scene();
+      scene.matrixAutoUpdate = false;
       camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 200, 2000000);
       camera.up.set(0, 0, 1);
       camera.position.set(0, -30000 + 10000, 60000 + 0);
@@ -1012,7 +1013,12 @@
         for (let x = 0; x < tileMeshes[y].length; x++) {
           const mesh = tileMeshes[y][x];
           if (!mesh) { continue; }
-          _box.copy(mesh.geometry.boundingBox).applyMatrix4(mesh.matrixWorld);
+          if (mesh.$boundingBoxWorld) {
+            _box.copy(mesh.$boundingBoxWorld);
+          } else {
+            _box.copy(mesh.geometry.boundingBox).applyMatrix4(mesh.matrixWorld);
+            mesh.$boundingBoxWorld = _box.clone();
+          }
           if (_frustum.intersectsBox(_box)) {
             if (ZMapGeometry.isPlaceholderGeometry(mesh.geometry)) {
               queue2.push([x, y]);
