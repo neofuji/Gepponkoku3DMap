@@ -211,6 +211,8 @@
     /** @type {Int16Array[]} */
     const zMapSea = [];
 
+    let tileMaterialSea = null;
+
     const tileTextures = [];
     const tileMeshes = [];
 
@@ -937,15 +939,25 @@
       texture.updateMatrix();
       texture.matrixAutoUpdate = false;
 
-      const material = new THREE.MeshLambertMaterial({ map: texture });
-      material.onBeforeCompile = (shader) => {
-        shader.vertexShader = shader.vertexShader.replace(
-          "\t#include <uv_vertex>\n",
-          "#ifdef USE_UV\n" +
-          "\tvUv = ( uvTransform * vec3( position.xy, 1 ) ).xy;\n" +
-          "#endif\n"
-        );
-      };
+      let material;
+
+      if (tileMap[y][x] === seaId && tileMaterialSea) {
+        material = tileMaterialSea;
+      } else {
+        material = new THREE.MeshLambertMaterial({ map: texture });
+        material.onBeforeCompile = (shader) => {
+          shader.vertexShader = shader.vertexShader.replace(
+            "\t#include <uv_vertex>\n",
+            "#ifdef USE_UV\n" +
+            "\tvUv = ( uvTransform * vec3( position.xy, 1 ) ).xy;\n" +
+            "#endif\n"
+          );
+        };
+
+        if (tileMap[y][x] === seaId) {
+          tileMaterialSea = material;
+        }
+      }
 
       const geometry = ZMapGeometry.placeholderGeometry(tileWidth, tileHeight, widthPoints, heightPoints, zMap);
 
