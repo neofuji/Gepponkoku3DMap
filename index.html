@@ -467,9 +467,7 @@
                 const r = data[index];
                 const g = data[index + 1];
                 const b = data[index + 2];
-                // const a = data[index + 3];
                 const color = (r << 16) | (g << 8) | b;
-                // const z = zPalette.indexOf(color) * 100;
                 let z = -100;
                 switch (color) {
                   case 0x99CCFF: z = -100; break;
