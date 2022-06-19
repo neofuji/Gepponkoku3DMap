@@ -681,45 +681,53 @@
         console.time("onloadTexture(" + x + ", " + y + ")");
         timeE -= performance.now();
       }
+      /** @type {HTMLCanvasElement} */
       const image = tileTextures[y][x].image;
-      const context = image.getContext("2d", { alpha: false });
       function drawNext(x, y, width, height, sx, sy, dx, dy) {
         // TODO: world's end
-        const context2 = tileTextures[y][x].image.getContext("2d", { alpha: false });
+        /** @type {HTMLCanvasElement} */
+        const image2 = tileTextures[y][x].image;
+        const context2 = image2.getContext("2d", { alpha: false });
         context2.drawImage(image, sx, sy, width, height, dx, dy, width, height);
         tileTextures[y][x].needsUpdate = true;
       }
       const v = padding;
       const u = padding;
-      if (tileMap[y][x] !== seaId) {
+      const isHereSea = tileMap[y][x] === seaId;
+      if (!isHereSea) {
+        const context = image.getContext("2d", { alpha: false });
         context.drawImage(tileTextureSourceImages[y][x].image, u, v);
+        tileTextures[y][x].needsUpdate = true;
       }
-      if (y - 1 >= 0 && tileTextures[y - 1][x]) {
-        if (x - 1 >= 0 && tileTextures[y - 1][x - 1]) {
+      if (y - 1 >= 0) {
+        if (x - 1 >= 0 && tileTextures[y - 1][x - 1] && !(isHereSea && tileMap[y - 1][x - 1] === seaId)) {
           drawNext(x - 1, y - 1, padding, padding, u, v, w + padding, h + padding);
         }
-        drawNext(x, y - 1, w, padding, u, v, u, h + padding);
-        if (x + 1 < tileTextures[y - 1].length && tileTextures[y - 1][x + 1]) {
+        if (tileTextures[y - 1][x] && !(isHereSea && tileMap[y - 1][x] === seaId)) {
+          drawNext(x, y - 1, w, padding, u, v, u, h + padding);
+        }
+        if (x + 1 < tileTextures[y - 1].length && tileTextures[y - 1][x + 1] && !(isHereSea && tileMap[y - 1][x + 1] === seaId)) {
           drawNext(x + 1, y - 1, padding, padding, w, v, 0, h + padding);
         }
       }
-      if (x - 1 >= 0 && tileTextures[y][x - 1]) {
+      if (x - 1 >= 0 && tileTextures[y][x - 1] && !(isHereSea && tileMap[y][x - 1] === seaId)) {
         drawNext(x - 1, y, padding, h, u, v, w + padding, v);
       }
-      if (x + 1 < tileTextures[y].length && tileTextures[y][x + 1]) {
+      if (x + 1 < tileTextures[y].length && tileTextures[y][x + 1] && !(isHereSea && tileMap[y][x + 1] === seaId)) {
         drawNext(x + 1, y, padding, h, w, v, 0, v);
       }
-      if (y + 1 < tileTextures.length && tileTextures[y + 1][x]) {
-        if (x - 1 >= 0 && tileTextures[y + 1][x - 1]) {
+      if (y + 1 < tileTextures.length) {
+        if (x - 1 >= 0 && tileTextures[y + 1][x - 1] && !(isHereSea && tileMap[y + 1][x - 1] === seaId)) {
           drawNext(x - 1, y + 1, padding, padding, u, h, w + padding, 0);
         }
-        drawNext(x, y + 1, w, padding, u, h, u, 0);
-        if (x + 1 < tileTextures[y + 1].length && tileTextures[y + 1][x + 1]) {
+        if (tileTextures[y + 1][x] && !(isHereSea && tileMap[y + 1][x] === seaId)) {
+          drawNext(x, y + 1, w, padding, u, h, u, 0);
+        }
+        if (x + 1 < tileTextures[y + 1].length && tileTextures[y + 1][x + 1] && !(isHereSea && tileMap[y + 1][x + 1] === seaId)) {
           drawNext(x + 1, y + 1, padding, padding, w, h, 0, 0);
         }
       }
       tileTextureSourceImages[y][x] = null;
-      tileTextures[y][x].needsUpdate = true;
       if (DEBUG) {
         timeE += performance.now();
         console.timeEnd("onloadTexture(" + x + ", " + y + ")");
