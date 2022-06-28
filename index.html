@@ -765,38 +765,39 @@
           if (!tileMap[y][x]) { continue; }
           if (y >= topY && x <= rightX && y <= bottomY && x >= leftX &&
               !(y >= lastTopY && x <= lastRightX && y <= lastBottomY && x >= lastLeftX)) {
-            {
-              const image = tileZMapSourceImages[y][x];
-              if (image) {
-                count++;
-                image.start();
-                image.decode().then(() => {
-                  onloadProgress();
-                  if (loadingLeftX === leftX) { loadMapRange(); }
-                  onloadZImage(x, y);
-                }).catch(e => {
-                  if (loadingLeftX === leftX) { loadMapRange(); }
-                  console.error(x, y, tileMap[y][x], e);
-                });
-              } else if (tileMap[y][x] === seaId) {
-                onloadZImage(x, y);
+            if (tileMap[y][x] === seaId) {
+              onloadZImage(x, y);
+              onloadTexture(x, y);
+            } else {
+              {
+                const image = tileZMapSourceImages[y][x];
+                if (image) {
+                  count++;
+                  image.start();
+                  image.decode().then(() => {
+                    onloadProgress();
+                    if (loadingLeftX === leftX) { loadMapRange(); }
+                    onloadZImage(x, y);
+                  }).catch(e => {
+                    if (loadingLeftX === leftX) { loadMapRange(); }
+                    console.error(x, y, tileMap[y][x], e);
+                  });
+                }
               }
-            }
-            {
-              const image = tileTextureSourceImages[y][x];
-              if (image) {
-                count++;
-                image.start();
-                image.decode().then(() => {
-                  onloadProgress();
-                  if (loadingLeftX === leftX) { loadMapRange(); }
-                  onloadTexture(x, y);
-                }).catch(e => {
-                  if (loadingLeftX === leftX) { loadMapRange(); }
-                  console.error(x, y, tileMap[y][x], e);
-                });
-              } else if (tileMap[y][x] === seaId) {
-                onloadTexture(x, y);
+              {
+                const image = tileTextureSourceImages[y][x];
+                if (image) {
+                  count++;
+                  image.start();
+                  image.decode().then(() => {
+                    onloadProgress();
+                    if (loadingLeftX === leftX) { loadMapRange(); }
+                    onloadTexture(x, y);
+                  }).catch(e => {
+                    if (loadingLeftX === leftX) { loadMapRange(); }
+                    console.error(x, y, tileMap[y][x], e);
+                  });
+                }
               }
             }
           }
