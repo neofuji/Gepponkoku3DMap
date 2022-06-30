@@ -339,7 +339,7 @@
       const tileTextureSeaCanvas = document.createElement("canvas");
       tileTextureSeaCanvas.width = textureWidth;
       tileTextureSeaCanvas.height = textureHeight;
-      const context = tileTextureSeaCanvas.getContext("2d");
+      const context = tileTextureSeaCanvas.getContext("2d", { alpha: false });
       context.fillStyle = "#99CCFF";
       context.fillRect(0, 0, textureWidth, textureHeight);
       const tileTextureSea = new THREE.Texture(tileTextureSeaCanvas);
