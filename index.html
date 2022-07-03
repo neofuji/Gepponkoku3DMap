@@ -855,17 +855,6 @@
       stats.update();
     }
 
-    function loaded() {
-      if (DEBUG) {
-        const now = performance.now();
-        timeF += now;
-        timeOnLoad = now;
-      }
-      window.splash.style.opacity = 1;
-      render();
-      isStarted = true;
-    }
-
     function animateLoaded() {
       requestAnimationFrame(animateLoaded);
 
@@ -873,24 +862,7 @@
         window.splash.style.opacity -= 0.125;
         if (window.splash.style.opacity <= 0) {
           window.splash.remove();
-          window.addEventListener("blur", () => {
-            disposeUnusedGeometries();
-            if (DEBUG) {
-              updateDebugRenderInfo();
-            }
-          }, false);
-          document.body.addEventListener("keydown", event => {
-            if (event.key === "f" && !event.repeat) {
-              document.body.requestFullscreen();
-            }
-          }, false);
-          controls.addEventListener("change", () => {
-            render();
-          }, false);
-          controls.addEventListener("change", function _loadMapRange() {
-            loadMapRange();
-            controls.removeEventListener("change", _loadMapRange);
-          }, false);
+          splashEnded();
         }
       }
 
@@ -942,6 +914,38 @@
       isGeometryGeneratedLastFrame = false;
 
       stats.update();
+    }
+
+    function loaded() {
+      if (DEBUG) {
+        const now = performance.now();
+        timeF += now;
+        timeOnLoad = now;
+      }
+      window.splash.style.opacity = 1;
+      render();
+      isStarted = true;
+    }
+
+    function splashEnded() {
+      window.addEventListener("blur", () => {
+        disposeUnusedGeometries();
+        if (DEBUG) {
+          updateDebugRenderInfo();
+        }
+      }, false);
+      document.body.addEventListener("keydown", event => {
+        if (event.key === "f" && !event.repeat) {
+          document.body.requestFullscreen();
+        }
+      }, false);
+      controls.addEventListener("change", () => {
+        render();
+      }, false);
+      controls.addEventListener("change", function _loadMapRange() {
+        loadMapRange();
+        controls.removeEventListener("change", _loadMapRange);
+      }, false);
     }
 
     function createTile(x, y, zMap, widthPoints, heightPoints) {
