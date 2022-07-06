@@ -49,7 +49,7 @@
     }
     #debugStatus {
       position: fixed;
-      right: 296px;
+      right: 336px;
       top: 8px;
       z-index: 3;
       padding: 0 4px;
@@ -74,11 +74,11 @@
 
     @media (max-width: 575.98px) {
       #debugStatus {
-        right: 156px;
+        right: 176px;
       }
       #debugMap svg {
-        width: 140px;
-        height: 140px;
+        width: 160px;
+        height: 160px;
       }
     }
   </style>
@@ -103,7 +103,7 @@
     <div id="debugRenderStatus"></div>
   </div>
   <div id="debugMap" hidden="hidden">
-    <svg width="280" height="280" viewbox="0 0 280 280">
+    <svg width="320" height="320" viewbox="0 0 320 320">
       <path id="debugSeaGeometryMapPath" fill="#80C0FFC0" />
       <path id="debugGeometryMapPath" fill="#FFFFFFC0" />
       <path id="debugMapPath" stroke="#FFFFFFC0" fill="transparent" />
@@ -158,6 +158,8 @@
     }
 
     const tileMap = [
+      ["xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea",  "xxxsea", "xxxsea", "xxxsea", "xxxsea", "p05n24", "p06n24", "p07n24", "xxxsea", ""      , ""      , ""      , ""      , ""      , ""      , ],
+      ["xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea",  "xxxsea", "xxxsea", "xxxsea", "p04n23", "p05n23", "p06n23", "p07n23", "p08n23", ""      , ""      , ""      , ""      , ""      , ""      , ],
       ["xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea",  "xxxsea", "p02n22", "p03n22", "p04n22", "p05n22", "p06n22", "p07n22", "p08n22", "p09n22", "xxxsea", ""      , ""      , ""      , ""      , ],
       ["xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea",  "p01n21", "p02n21", "p03n21", "p04n21", "p05n21", "p06n21", "p07n21", "p08n21", "p09n21", "p10n21", ""      , ""      , ""      , ""      , ],
       ["xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea",  "p01n20", "p02n20", "p03n20", "p04n20", "p05n20", "p06n20", "p07n20", "p08n20", "p09n20", "p10n20", "p11n20", "p12n20", "xxxsea", "xxxsea", ],
@@ -197,12 +199,12 @@
     const tileWidth = 50000;
     const tileHeight = 50000;
     const offsetX = 25000 * -11;
-    const offsetY = 25000 * -45;
+    const offsetY = 25000 * -49;
 
     let loadingLeftX = 2;
     let loadingRightX = 9 - 1;
-    let loadingTopY = 19;
-    let loadingBottomY = 25 - 1;
+    let loadingTopY = 21;
+    let loadingBottomY = 27 - 1;
 
     /** @type {ImageWrapper[][]} */
     const tileZMapSourceImages = [];
