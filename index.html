@@ -200,8 +200,8 @@
     const textureHeight = 512;
     const tileWidth = 50000;
     const tileHeight = 50000;
-    const offsetX = 25000 * -(originX * 2 + 1);
-    const offsetY = 25000 * -(originY * 2 + 1);
+    const offsetX = -(originX * tileWidth + tileWidth / 2);
+    const offsetY = -(originY * tileHeight + tileHeight / 2);
 
     let loadingLeftX = originX - 3;
     let loadingRightX = originX + 3;
