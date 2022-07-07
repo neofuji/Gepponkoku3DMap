@@ -189,6 +189,8 @@
       [""      , ""      , ""      , ""      , ""      , "n00p03",  "xxxsea", "xxxsea", "xxxsea", "xxxsea", "p05p03", "p06p03", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", ],
     ];
     const seaId = "xxxsea";
+    const originX = 5;
+    const originY = 24;
 
     const sourceImageWidth = 500;
     const sourceImageHeight = 500;
@@ -198,13 +200,13 @@
     const textureHeight = 512;
     const tileWidth = 50000;
     const tileHeight = 50000;
-    const offsetX = 25000 * -11;
-    const offsetY = 25000 * -49;
+    const offsetX = 25000 * -(originX * 2 + 1);
+    const offsetY = 25000 * -(originY * 2 + 1);
 
-    let loadingLeftX = 2;
-    let loadingRightX = 9 - 1;
-    let loadingTopY = 21;
-    let loadingBottomY = 27 - 1;
+    let loadingLeftX = originX - 3;
+    let loadingRightX = originX + 3;
+    let loadingTopY = originY - 3;
+    let loadingBottomY = originY + 2;
 
     /** @type {ImageWrapper[][]} */
     const tileZMapSourceImages = [];
