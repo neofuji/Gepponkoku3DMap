@@ -956,8 +956,8 @@
 
     function createTile(x, y, zMap, widthPoints, heightPoints) {
       const texture = tileTextures[y][x];
-      texture.repeat.x = 1 / (textureWidth * 100);
-      texture.repeat.y = 1 / (textureHeight * 100);
+      texture.repeat.x = 1 / (textureWidth * tileWidth / sourceImageWidth);
+      texture.repeat.y = 1 / (textureHeight * tileHeight / sourceImageHeight);
       texture.offset.x = 0.5;
       texture.offset.y = 0.5;
       texture.updateMatrix();
