@@ -849,7 +849,9 @@
             if (DEBUG) {
               timeD -= performance.now();
             }
-            smoothZMap(zMap, w, h);
+            if (tileMap[y][x] !== seaId) {
+              smoothZMap(zMap, w, h);
+            }
             createTile(x, y, zMap, w, h);
             if (DEBUG) {
               timeD += performance.now();
@@ -907,7 +909,9 @@
             if (DEBUG) {
               timeD -= performance.now();
             }
-            smoothZMap(zMap, w, h);
+            if (tileMap[y][x] !== seaId) {
+              smoothZMap(zMap, w, h);
+            }
             createTile(x, y, zMap, w, h);
             if (DEBUG) {
               timeD += performance.now();
