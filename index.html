@@ -1177,7 +1177,11 @@
         for (let x = 0; x < tileMeshes[y].length; x++) {
           if (!tileMeshes[y][x]) { continue; }
           if (!ZMapGeometry.isPlaceholderGeometry(tileMeshes[y][x].geometry)) {
-            const segment = tileMeshes[y][x].geometry._zMap ? "M" + (x * 10 + 8) + "," + (y * 10 + 8) + "h4v4h-4Z" : "M" + (x * 10 + 6) + "," + (y * 10 + 6) + "h8v8h-8Z";
+            const segment = (
+              tileMeshes[y][x].geometry._zMap
+              ? "M" + (x * 10 + 8) + "," + (y * 10 + 8) + "h4v4h-4Z"
+              : "M" + (x * 10 + 6) + "," + (y * 10 + 6) + "h8v8h-8Z"
+            );
             if (tileMap[y][x] === seaId) {
               sgd += segment;
             } else {
