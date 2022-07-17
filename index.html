@@ -840,14 +840,20 @@
       if (DEBUG) {
         updateDebugGeometryMap();
         window.debugLoaderStatus.textContent =
-          timeB.toFixed(0) + "ms " + timeC.toFixed(0) + "ms " + timeD.toFixed(0) + "ms " + timeE.toFixed(0) + "ms " + timeF.toFixed(0) + "ms " + timeOnLoad.toFixed(0) + "ms\n";
+          timeB.toFixed(0) + "ms " +
+          timeC.toFixed(0) + "ms " +
+          timeD.toFixed(0) + "ms " +
+          timeE.toFixed(0) + "ms " +
+          timeF.toFixed(0) + "ms " +
+          timeOnLoad.toFixed(0) + "ms\n";
       }
       if (imageLoadProgress >= imageLoadAll) { return; }
       imageLoadProgress++;
       if (DEBUG) {
         window.debugLoaderStatus.textContent += imageLoadAll - imageLoadProgress;
       }
-      window.progressCircle.setAttribute("stroke-dasharray", (imageLoadProgress / imageLoadAll) * 100 + "," + (1 - imageLoadProgress / imageLoadAll) * 100);
+      const imageLoadPercent = imageLoadProgress / imageLoadAll * 100;
+      window.progressCircle.setAttribute("stroke-dasharray", imageLoadPercent + "," + (100 - imageLoadPercent));
     }
 
     function animateLoading() {
