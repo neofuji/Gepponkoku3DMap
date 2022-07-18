@@ -1162,6 +1162,8 @@
     }
 
     function updateDebugRenderInfo() {
+      const polarAngle = controls.getPolarAngle() * 180 / Math.PI;
+      const azimuthalAngle = controls.getAzimuthalAngle() * 180 / Math.PI;
       window.debugRenderStatus.textContent =
         renderer.info.render.frame + "frame " +
         renderer.info.render.calls + "calls " +
@@ -1170,7 +1172,7 @@
         renderer.info.memory.textures + "texes " +
         renderer.info.programs.length + "programs\n" +
         "camera " + camera.position.x.toFixed(2) + ", " + camera.position.y.toFixed(2) + ", " + camera.position.z.toFixed(2) + "\n" +
-        "angle " + (controls.getPolarAngle() * 180 / Math.PI).toFixed(2) + ", 0.00, " + (controls.getAzimuthalAngle() * 180 / Math.PI).toFixed(2) + "\n" +
+        "angle " + polarAngle.toFixed(2) + ", 0.00, " + azimuthalAngle.toFixed(2) + "\n" +
         "center " + controls.target.x.toFixed(2) + ", " + controls.target.y.toFixed(2) +
         "";
     }
