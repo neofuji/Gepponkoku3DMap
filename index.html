@@ -1178,6 +1178,8 @@
     }
 
     function updateDebugGeometryMap() {
+      const px = 5;
+      const py = 5;
       let sgd = "";
       let gd = "";
       let d = "";
@@ -1187,8 +1189,8 @@
           if (!ZMapGeometry.isPlaceholderGeometry(tileMeshes[y][x].geometry)) {
             const segment = (
               tileMeshes[y][x].geometry._zMap
-              ? "M" + (x * 10 + 8) + "," + (y * 10 + 8) + "h4v4h-4Z"
-              : "M" + (x * 10 + 6) + "," + (y * 10 + 6) + "h8v8h-8Z"
+              ? "M" + (x * 10 + 3 + px) + "," + (y * 10 + 3 + py) + "h4v4h-4Z"
+              : "M" + (x * 10 + 1 + px) + "," + (y * 10 + 1 + py) + "h8v8h-8Z"
             );
             if (tileMap[y][x] === seaId) {
               sgd += segment;
@@ -1196,7 +1198,7 @@
               gd += segment;
             }
           } else {
-            d += "M" + (x * 10 + 6.5) + "," + (y * 10 + 6.5) + "h7v7h-7Z";
+            d += "M" + (x * 10 + 1.5 + px) + "," + (y * 10 + 1.5 + py) + "h7v7h-7Z";
           }
         }
       }
@@ -1206,11 +1208,13 @@
     }
 
     function updateDebugVisibleMap() {
+      const px = 5;
+      const py = 5;
       let vd = "";
       for (let y = 0; y < tileMeshes.length; y++) {
         for (let x = 0; x < tileMeshes[y].length; x++) {
           if (tileMeshes[y][x]?.visible) {
-            vd += "M" + (x * 10 + 6) + "," + (y * 10 + 6) + "h8v8h-8Z";
+            vd += "M" + (x * 10 + 1 + px) + "," + (y * 10 + 1 + py) + "h8v8h-8Z";
           }
         }
       }
@@ -1218,9 +1222,9 @@
       const centerPos = controls.target;
       const cameraPos = camera.position;
       window.debugCenterMapPath.setAttribute("d",
-        "M" + ((centerPos.x - offsetX) / tileWidth * 10 - 5 + 5) + "," + ((-centerPos.y - offsetY) / tileWidth * 10 + 5) +
+        "M" + ((centerPos.x - offsetX) / tileWidth * 10 - 5 + px) + "," + ((-centerPos.y - offsetY) / tileWidth * 10 + py) +
         "h10m-5-5v10" +
-        "M" + ((cameraPos.x - offsetX) / tileHeight * 10 - 3 + 5) + "," + ((-cameraPos.y - offsetY) / tileHeight * 10 - 3 + 5) +
+        "M" + ((cameraPos.x - offsetX) / tileHeight * 10 - 3 + px) + "," + ((-cameraPos.y - offsetY) / tileHeight * 10 - 3 + py) +
         "l6,6m0-6l-6,6"
       );
     }
