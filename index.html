@@ -847,7 +847,11 @@
           timeF.toFixed(0) + "ms " +
           timeOnLoad.toFixed(0) + "ms\n";
       }
-      if (imageLoadProgress >= imageLoadAll) { return; }
+
+      if (imageLoadProgress >= imageLoadAll) {
+        render();
+        return;
+      }
       imageLoadProgress++;
       if (DEBUG) {
         window.debugLoaderStatus.textContent += imageLoadAll - imageLoadProgress;
