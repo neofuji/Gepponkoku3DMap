@@ -211,9 +211,11 @@
     const sourceImageWidth = 500;
     const sourceImageHeight = 500;
     const zMapResizeFactor = 2;
+    const zMapPadding = 3;
     const texturePadding = 6;
     const textureWidth = 512;
     const textureHeight = 512;
+
     const tileWidth = 50000;
     const tileHeight = 50000;
     const offsetX = -(originX * tileWidth + tileWidth / 2);
@@ -292,11 +294,11 @@
         }
       }
 
-      const zMapSeaRow = new Int16Array(256);
-      for (let x = 0; x < 256; x++) {
+      const zMapSeaRow = new Int16Array(sourceImageWidth / zMapResizeFactor + zMapPadding * 2);
+      for (let x = 0; x < sourceImageWidth / zMapResizeFactor + zMapPadding * 2; x++) {
         zMapSeaRow[x] = -100;
       }
-      for (let y = 0; y < 256; y++) {
+      for (let y = 0; y < sourceImageHeight / zMapResizeFactor + zMapPadding * 2; y++) {
         zMapSea.push(zMapSeaRow);
       }
 
@@ -321,8 +323,8 @@
             if (tileMap[y][x] === seaId) {
               zMaps[y][x] = zMapSea;
             } else {
-              for (let i = 0; i < 256; i++) {
-                zMaps[y][x].push(new Int16Array(256));
+              for (let i = 0; i < sourceImageHeight / zMapResizeFactor + zMapPadding * 2; i++) {
+                zMaps[y][x].push(new Int16Array(sourceImageWidth / zMapResizeFactor + zMapPadding * 2));
               }
             }
           }
@@ -470,8 +472,8 @@
               if (tileMap[y][x] === seaId) {
                 zMaps[y][x] = zMapSea;
               } else {
-                for (let i = 0; i < 256; i++) {
-                  zMaps[y][x].push(new Int16Array(256));
+                for (let i = 0; i < sourceImageHeight / zMapResizeFactor + zMapPadding * 2; i++) {
+                  zMaps[y][x].push(new Int16Array(sourceImageWidth / zMapResizeFactor + zMapPadding * 2));
                 }
               }
             }
@@ -609,7 +611,7 @@
       const resizeFactor = zMapResizeFactor;
       const dw = width / resizeFactor;
       const dh = height / resizeFactor;
-      const padding = 3;
+      const padding = zMapPadding;
       if (DEBUG) {
         timeB -= performance.now();
       }
