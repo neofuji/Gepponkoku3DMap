@@ -212,6 +212,8 @@
     const sourceImageHeight = 500;
     const zMapResizeFactor = 2;
     const zMapPadding = 3;
+    const zMapWidth = sourceImageWidth / zMapResizeFactor + zMapPadding * 2;
+    const zMapHeight = sourceImageHeight / zMapResizeFactor + zMapPadding * 2;
     const texturePadding = 6;
     const textureWidth = 512;
     const textureHeight = 512;
@@ -294,11 +296,11 @@
         }
       }
 
-      const zMapSeaRow = new Int16Array(sourceImageWidth / zMapResizeFactor + zMapPadding * 2);
-      for (let x = 0; x < sourceImageWidth / zMapResizeFactor + zMapPadding * 2; x++) {
+      const zMapSeaRow = new Int16Array(zMapWidth);
+      for (let x = 0; x < zMapWidth; x++) {
         zMapSeaRow[x] = -100;
       }
-      for (let y = 0; y < sourceImageHeight / zMapResizeFactor + zMapPadding * 2; y++) {
+      for (let y = 0; y < zMapHeight; y++) {
         zMapSea.push(zMapSeaRow);
       }
 
@@ -323,8 +325,8 @@
             if (tileMap[y][x] === seaId) {
               zMaps[y][x] = zMapSea;
             } else {
-              for (let i = 0; i < sourceImageHeight / zMapResizeFactor + zMapPadding * 2; i++) {
-                zMaps[y][x].push(new Int16Array(sourceImageWidth / zMapResizeFactor + zMapPadding * 2));
+              for (let i = 0; i < zMapHeight; i++) {
+                zMaps[y][x].push(new Int16Array(zMapWidth));
               }
             }
           }
@@ -472,8 +474,8 @@
               if (tileMap[y][x] === seaId) {
                 zMaps[y][x] = zMapSea;
               } else {
-                for (let i = 0; i < sourceImageHeight / zMapResizeFactor + zMapPadding * 2; i++) {
-                  zMaps[y][x].push(new Int16Array(sourceImageWidth / zMapResizeFactor + zMapPadding * 2));
+                for (let i = 0; i < zMapHeight; i++) {
+                  zMaps[y][x].push(new Int16Array(zMapWidth));
                 }
               }
             }
