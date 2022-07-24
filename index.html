@@ -159,7 +159,11 @@
 
     let imageLoadAll = 0;
     let imageLoadProgress = 0;
+
+    /** @type {[number, number][]} */
     const zImageQueue = [];
+
+    /** @type {[number, number, Int16Array[], number, number][]} */
     const zMapQueue = [];
 
     let isRenderRequested = false;
