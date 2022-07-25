@@ -265,7 +265,9 @@
 
     const zContext = zCanvas.getContext("2d", { alpha: false });
 
+    /** @type {[number, number][]} */
     const geometryGenerateQueue = [];
+
     let isGeometryGeneratedLastFrame = false;
 
     load1();
