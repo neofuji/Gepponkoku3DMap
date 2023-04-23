@@ -55,7 +55,7 @@
     }
     #debugStatus {
       position: fixed;
-      right: 416px;
+      right: 456px;
       top: 8px;
       z-index: 3;
       padding: 0 4px;
@@ -80,11 +80,11 @@
 
     @media (max-width: 575.98px) {
       #debugStatus {
-        right: 216px;
+        right: 236px;
       }
       #debugMap svg {
-        width: 200px;
-        height: 200px;
+        width: 220px;
+        height: 220px;
       }
     }
   </style>
@@ -119,7 +119,7 @@
     <div id="debugRenderStatus"></div>
   </div>
   <div id="debugMap" hidden="hidden">
-    <svg width="400" height="400" viewbox="0 0 400 400">
+    <svg width="440" height="440" viewbox="0 0 440 440">
       <path id="debugSeaGeometryMapPath" fill="#80C0FFC0" />
       <path id="debugGeometryMapPath" fill="#FFFFFFC0" />
       <path id="debugMapPath" stroke="#FFFFFFC0" fill="transparent" />
@@ -210,13 +210,15 @@
       [""      , ""      , ""      , ""      , ""      , ""      , ""      , ""      , ""      , ""      , "n11p04", "n10p04", "n09p04", "n08p04", "n07p04", "n06p04", "n05p04", "n04p04", "n03p04", "n02p04", "n01p04", "xxxsea",  "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", ],
       [""      , ""      , ""      , ""      , ""      , ""      , ""      , ""      , "n13p05", "n12p05", "n11p05", "n10p05", "n09p05", "n08p05", "n07p05", "n06p05", "n05p05", "n04p05", "n03p05", "n02p05", "xxxsea", "xxxsea",  "p01p05", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", ],
       [""      , ""      , ""      , ""      , ""      , ""      , "n15p06", "n14p06", "n13p06", "n12p06", "n11p06", "n10p06", "n09p06", "n08p06", "n07p06", "xxxsea", "n05p06", "n04p06", "xxxsea", "xxxsea", "xxxsea", "xxxsea",  "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", ],
-      [""      , ""      , ""      , ""      , ""      , "xxxsea", "xxxsea", "n14p07", "n13p07", "n12p07", "n11p07", "n10p07", "n09p07", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea",  "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", ],
-      [""      , ""      , ""      , ""      , "xxxsea", "xxxsea", "xxxsea", "xxxsea", "n13p08", "n12p08", "n11p08", "n10p08", "n09p08", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea",  "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", ],
-      [""      , ""      , ""      , ""      , "xxxsea", "xxxsea", "xxxsea", "xxxsea", "n13p09", "n12p09", "n11p09", "n10p09", "n09p09", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea",  "xxxsea", "xxxsea", "p03p09", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", ],
-      [""      , ""      , ""      , ""      , "xxxsea", "xxxsea", "xxxsea", "n14p10", "n13p10", "n12p10", "n11p10", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea",  "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", ],
-      [""      , ""      , ""      , ""      , "n17p11", "xxxsea", "n15p11", "n14p11", "n13p11", "n12p11", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea",  "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", ],
-      [""      , ""      , ""      , ""      , "n17p12", "n16p12", "n15p12", "n14p12", "n13p12", "n12p12", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea",  "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", ],
-      [""      , ""      , ""      , ""      , "n17p13", "n16p13", "n15p13", "n14p13", "n13p13", "n12p13", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea",  "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", ],
+      [""      , ""      , ""      , ""      , "xxxsea", "xxxsea", "xxxsea", "n14p07", "n13p07", "n12p07", "n11p07", "n10p07", "n09p07", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea",  "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", ],
+      [""      , ""      , "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "n13p08", "n12p08", "n11p08", "n10p08", "n09p08", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea",  "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", ],
+      ["xxxsea", "n20p09", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "n13p09", "n12p09", "n11p09", "n10p09", "n09p09", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea",  "xxxsea", "xxxsea", "p03p09", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", ],
+      ["xxxsea", "n20p10", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "n14p10", "n13p10", "n12p10", "n11p10", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea",  "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", ],
+      ["xxxsea", "xxxsea", "xxxsea", "xxxsea", "n17p11", "xxxsea", "n15p11", "n14p11", "n13p11", "n12p11", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea",  "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", ],
+      ["xxxsea", "xxxsea", "n19p12", "xxxsea", "n17p12", "n16p12", "n15p12", "n14p12", "n13p12", "n12p12", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea",  "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", ],
+      [""      , "xxxsea", "xxxsea", "xxxsea", "n17p13", "n16p13", "n15p13", "n14p13", "n13p13", "n12p13", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea",  "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", ],
+      [""      , ""      , "xxxsea", "xxxsea", "n17p14", "n16p14", "n15p14", "n14p14", "n13p14", "n12p14", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea",  "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "p06p14", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", ],
+      [""      , ""      , "xxxsea", "n18p15", "n17p15", "n16p15", "n15p15", "n14p15", "n13p15", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea",  "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "p06p15", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", "xxxsea", ],
     ];
     const seaId = "xxxsea";
     const originX = 21;
