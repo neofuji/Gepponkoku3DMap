@@ -722,9 +722,11 @@
         if (x - 1 >= 0) {
           const zMapNW = zMaps[y - 1][x - 1];
           if (zMapNW) {
-            for (let i = 0; i < padding; i++) {
-              for (let j = 0; j < padding; j++) {
-                zMapNW[h + padding + i][w + padding + j] = zMap[0 + padding + i][0 + padding + j];
+            if (tileMap[y - 1][x - 1] !== seaId) {
+              for (let i = 0; i < padding; i++) {
+                for (let j = 0; j < padding; j++) {
+                  zMapNW[h + padding + i][w + padding + j] = zMap[0 + padding + i][0 + padding + j];
+                }
               }
             }
             if (--zMapDependents[y - 1][x - 1] === 0) {
@@ -734,9 +736,11 @@
         }
         const zMapN = zMaps[y - 1][x];
         if (zMapN) {
-          for (let u = 0 + padding; u < w + padding; u++) {
-            for (let i = 0; i < padding; i++) {
-              zMapN[h + padding + i][u] = zMap[0 + padding + i][u];
+          if (tileMap[y - 1][x] !== seaId) {
+            for (let u = 0 + padding; u < w + padding; u++) {
+              for (let i = 0; i < padding; i++) {
+                zMapN[h + padding + i][u] = zMap[0 + padding + i][u];
+              }
             }
           }
           if (--zMapDependents[y - 1][x] === 0) {
@@ -746,9 +750,11 @@
         if (x + 1 < zMaps[y - 1].length) {
           const zMapNE = zMaps[y - 1][x + 1];
           if (zMapNE) {
-            for (let i = 0; i < padding; i++) {
-              for (let j = 0; j < padding; j++) {
-                zMapNE[h + padding + i][0 + j] = zMap[0 + padding + i][w + j];
+            if (tileMap[y - 1][x + 1] !== seaId) {
+              for (let i = 0; i < padding; i++) {
+                for (let j = 0; j < padding; j++) {
+                  zMapNE[h + padding + i][0 + j] = zMap[0 + padding + i][w + j];
+                }
               }
             }
             if (--zMapDependents[y - 1][x + 1] === 0) {
@@ -761,9 +767,11 @@
         if (x - 1 >= 0) {
           const zMapSW = zMaps[y + 1][x - 1];
           if (zMapSW) {
-            for (let i = 0; i < padding; i++) {
-              for (let j = 0; j < padding; j++) {
-                zMapSW[0 + i][w + padding + j] = zMap[h + i][0 + padding + j];
+            if (tileMap[y + 1][x - 1] !== seaId) {
+              for (let i = 0; i < padding; i++) {
+                for (let j = 0; j < padding; j++) {
+                  zMapSW[0 + i][w + padding + j] = zMap[h + i][0 + padding + j];
+                }
               }
             }
             if (--zMapDependents[y + 1][x - 1] === 0) {
@@ -773,9 +781,11 @@
         }
         const zMapS = zMaps[y + 1][x];
         if (zMapS) {
-          for (let u = 0 + padding; u < w + padding; u++) {
-            for (let i = 0; i < padding; i++) {
-              zMapS[0 + i][u] = zMap[h + i][u];
+          if (tileMap[y + 1][x] !== seaId) {
+            for (let u = 0 + padding; u < w + padding; u++) {
+              for (let i = 0; i < padding; i++) {
+                zMapS[0 + i][u] = zMap[h + i][u];
+              }
             }
           }
           if (--zMapDependents[y + 1][x] === 0) {
@@ -785,9 +795,11 @@
         if (x + 1 < zMaps[y + 1].length) {
           const zMapSE = zMaps[y + 1][x + 1];
           if (zMapSE) {
-            for (let i = 0; i < padding; i++) {
-              for (let j = 0; j < padding; j++) {
-                zMapSE[0 + i][0 + j] = zMap[h + i][w + j];
+            if (tileMap[y + 1][x + 1] !== seaId) {
+              for (let i = 0; i < padding; i++) {
+                for (let j = 0; j < padding; j++) {
+                  zMapSE[0 + i][0 + j] = zMap[h + i][w + j];
+                }
               }
             }
             if (--zMapDependents[y + 1][x + 1] === 0) {
@@ -799,9 +811,11 @@
       if (x - 1 >= 0) {
         const zMapW = zMaps[y][x - 1];
         if (zMapW) {
-          for (let v = 0 + padding; v < h + padding; v++) {
-            for (let i = 0; i < padding; i++) {
-              zMapW[v][w + padding + i] = zMap[v][0 + padding + i];
+          if (tileMap[y][x - 1] !== seaId) {
+            for (let v = 0 + padding; v < h + padding; v++) {
+              for (let i = 0; i < padding; i++) {
+                zMapW[v][w + padding + i] = zMap[v][0 + padding + i];
+              }
             }
           }
           if (--zMapDependents[y][x - 1] === 0) {
@@ -812,9 +826,11 @@
       if (x + 1 < zMaps[y].length) {
         const zMapE = zMaps[y][x + 1];
         if (zMapE) {
-          for (let v = 0 + padding; v < h + padding; v++) {
-            for (let i = 0; i < padding; i++) {
-              zMapE[v][0 + i] = zMap[v][w + i];
+          if (tileMap[y][x + 1] !== seaId) {
+            for (let v = 0 + padding; v < h + padding; v++) {
+              for (let i = 0; i < padding; i++) {
+                zMapE[v][0 + i] = zMap[v][w + i];
+              }
             }
           }
           if (--zMapDependents[y][x + 1] === 0) {
