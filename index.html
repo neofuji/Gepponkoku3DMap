@@ -967,8 +967,42 @@
           }
         }
         if (zImageQueue.length > 0) {
-          const [x, y] = zImageQueue.shift();
-          createZMap(x, y);
+          let leftX = tileMeshes[0].length - 1;
+          let rightX = 0;
+          let topY = tileMeshes.length - 1;
+          let bottomY = 0;
+          for (let y = 0; y < tileMeshes.length; y++) {
+            for (let x = 0; x < tileMeshes[y].length; x++) {
+              if (tileMeshes[y][x]?.visible) {
+                if (y < topY) { topY = y; }
+                if (y > bottomY) { bottomY = y; }
+                if (x < leftX) { leftX = x; }
+                if (x > rightX) { rightX = x; }
+              }
+            }
+          }
+          const d = 1;
+          for (let i = 0; i < zImageQueue.length; i++) {
+            const [x, y] = zImageQueue[i];
+            if (tileMap[y][x] === seaId && x >= leftX - d && x <= rightX + d && y >= topY - d && y <= bottomY + d) {
+              createZMap(x, y);
+              zImageQueue.splice(i--, 1);
+            }
+          }
+          if (zImageQueue.length > 0) {
+            let index = 0;
+            d: for (let d = 1; d <= 2; d++) {
+              for (let i = 0; i < zImageQueue.length; i++) {
+                const [x, y] = zImageQueue[i];
+                if (x >= leftX - d && x <= rightX + d && y >= topY - d && y <= bottomY + d) {
+                  index = i;
+                  break d;
+                }
+              }
+            }
+            const [x, y] = zImageQueue.splice(index, 1)[0];
+            createZMap(x, y);
+          }
         }
         if (zMapQueue.length > 0) {
           for (let [x, y, zMap, w, h] of zMapQueue) {
