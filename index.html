@@ -260,6 +260,7 @@
     /** @type {Int16Array[]} */
     const zMapSea = [];
 
+    let tileGeometrySea = null;
     let tileMaterialSea = null;
 
     const tileTextures = [];
@@ -382,6 +383,12 @@
         console.log("start load2() at", performance.now(), "ms");
       }
       isThreeReady = true;
+
+      {
+        const widthPoints = sourceImageWidth / zMapResizeFactor + 2;
+        const heightPoints = sourceImageHeight / zMapResizeFactor + 2;
+        tileGeometrySea = ZMapGeometry.generateGeometry(tileWidth, tileHeight, widthPoints, heightPoints, zMapSea);
+      }
 
       const tileTextureSeaCanvas = document.createElement("canvas");
       tileTextureSeaCanvas.width = textureWidth;
@@ -1092,7 +1099,20 @@
         }
       }
 
-      const geometry = ZMapGeometry.placeholderGeometry(tileWidth, tileHeight, widthPoints, heightPoints, zMap);
+      const geometry = 
+        tileMap[y][x] === seaId &&
+        !(
+          (y - 1 >= 0 && x - 1 >= 0 && tileMap[y - 1][x - 1] !== seaId) ||
+          (y - 1 >= 0 && tileMap[y - 1][x] !== seaId) ||
+          (y - 1 >= 0 && x + 1 < tileMap[y - 1].length && tileMap[y - 1][x + 1] !== seaId) ||
+          (x - 1 >= 0 && tileMap[y][x - 1] !== seaId) ||
+          (x + 1 < tileMap[y].length && tileMap[y][x + 1] !== seaId) ||
+          (y + 1 < tileMap.length && x - 1 >= 0 && tileMap[y + 1][x - 1] !== seaId) ||
+          (y + 1 < tileMap.length && tileMap[y + 1][x] !== seaId) ||
+          (y + 1 < tileMap.length && x + 1 < tileMap[y + 1].length && tileMap[y + 1][x + 1] !== seaId)
+        )
+          ? tileGeometrySea
+          : ZMapGeometry.placeholderGeometry(tileWidth, tileHeight, widthPoints, heightPoints, zMap);
 
       const mesh = new THREE.Mesh(geometry, material);
       mesh.position.x = tileWidth * (x + 0.5) + offsetX;
@@ -1110,7 +1130,7 @@
         x: for (let x = 0; x < tileMeshes[y].length; x++) {
           const mesh = tileMeshes[y][x];
           if (!mesh) { continue; }
-          if (!mesh.visible) {
+          if (!mesh.visible && mesh.geometry !== tileGeometrySea) {
             for (let dy = -1; dy <= 1; dy++) {
               if (y + dy < 0) { continue; }
               if (y + dy >= tileMeshes.length) { break; }
