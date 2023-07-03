@@ -1071,19 +1071,19 @@
     }
 
     function createTile(x, y, zMap, widthPoints, heightPoints) {
-      const texture = tileTextures[y][x];
-      texture.repeat.x = 1 / (textureWidth * tileWidth / sourceImageWidth);
-      texture.repeat.y = 1 / (textureHeight * tileHeight / sourceImageHeight);
-      texture.offset.x = 0.5;
-      texture.offset.y = 0.5;
-      texture.updateMatrix();
-      texture.matrixAutoUpdate = false;
-
       let material;
 
       if (tileMap[y][x] === seaId && tileMaterialSea) {
         material = tileMaterialSea;
       } else {
+        const texture = tileTextures[y][x];
+        texture.repeat.x = 1 / (textureWidth * tileWidth / sourceImageWidth);
+        texture.repeat.y = 1 / (textureHeight * tileHeight / sourceImageHeight);
+        texture.offset.x = 0.5;
+        texture.offset.y = 0.5;
+        texture.updateMatrix();
+        texture.matrixAutoUpdate = false;
+
         material = new THREE.MeshLambertMaterial({ map: texture });
         material.onBeforeCompile = (shader) => {
           shader.vertexShader = shader.vertexShader.replace(
