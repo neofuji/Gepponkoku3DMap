@@ -100,7 +100,7 @@
       </li><!--
        --><li>
         <a href="https://github.com/neofuji/Gepponkoku3DMap" target="_blank">
-          &copy; 2024 Toru Higuruma<img src="img/GitHub-Mark-64px.png" alt="View on GitHub" />
+          &copy; 2025 Toru Higuruma<img src="img/GitHub-Mark-64px.png" alt="View on GitHub" />
         </a>
       </li>
     </ul>
@@ -1340,9 +1340,9 @@
       const centerPos = controls.target;
       const cameraPos = camera.position;
       window.debugCenterMapPath.setAttribute("d",
-        "M" + ((centerPos.x - offsetX) / tileWidth * 10 - 5 + px) + "," + ((-centerPos.y - offsetY) / tileWidth * 10 + py) +
+        "M" + ((centerPos.x - offsetX) / tileWidth * 10 - 5 + px) + "," + ((-centerPos.y - offsetY) / tileHeight * 10 + py) +
         "h10m-5-5v10" +
-        "M" + ((cameraPos.x - offsetX) / tileHeight * 10 - 3 + px) + "," + ((-cameraPos.y - offsetY) / tileHeight * 10 - 3 + py) +
+        "M" + ((cameraPos.x - offsetX) / tileWidth * 10 - 3 + px) + "," + ((-cameraPos.y - offsetY) / tileHeight * 10 - 3 + py) +
         "l6,6m0-6l-6,6"
       );
     }
