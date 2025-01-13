@@ -289,7 +289,7 @@
     zCanvas.width = sourceImageWidth;
     zCanvas.height = sourceImageHeight;
 
-    const zContext = zCanvas.getContext("2d", { alpha: false });
+    const zContext = zCanvas.getContext("2d", { alpha: false, willReadFrequently: true });
 
     /** @type {[number, number][]} */
     const geometryGenerateQueue = [];
