@@ -1183,7 +1183,6 @@
       const queue2 = [];
       const _projScreenMatrix = new THREE.Matrix4();
       const _frustum = new THREE.Frustum();
-      const _box = new THREE.Box3();
       scene.updateMatrixWorld();
       camera.updateMatrixWorld();
       _projScreenMatrix.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse);
@@ -1192,13 +1191,10 @@
         for (let x = 0; x < tileMeshes[y].length; x++) {
           const mesh = tileMeshes[y][x];
           if (!mesh) { continue; }
-          if (mesh.$boundingBoxWorld) {
-            _box.copy(mesh.$boundingBoxWorld);
-          } else {
-            _box.copy(mesh.geometry.boundingBox).applyMatrix4(mesh.matrixWorld);
-            mesh.$boundingBoxWorld = _box.clone();
+          if (!mesh.$boundingBoxWorld) {
+            mesh.$boundingBoxWorld = mesh.geometry.boundingBox.clone().applyMatrix4(mesh.matrixWorld);
           }
-          if (_frustum.intersectsBox(_box)) {
+          if (_frustum.intersectsBox(mesh.$boundingBoxWorld)) {
             if (ZMapGeometry.isPlaceholderGeometry(mesh.geometry)) {
               queue2.push([x, y]);
               if (DEBUG) {
